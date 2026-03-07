@@ -54,6 +54,24 @@ Work through every step in sequence. Be honest about gaps.
 
 ---
 
+## Repo-Specific Review Context
+
+This section is filled in by `@init` for each repo. If blocks still show
+defaults, the repo has not run `@init` — note that as a finding.
+
+### Specialist knowledge surface — repo-specific
+<!-- REPO-CUSTOM: specialist-surface
+No specialist agents or domain-specific rules defined.
+Review only against baseline guardrails.
+END-REPO-CUSTOM -->
+
+### Governance and compliance requirements — repo-specific
+<!-- REPO-CUSTOM: governance-requirements
+No special governance requirements defined beyond baseline guardrails.
+END-REPO-CUSTOM -->
+
+---
+
 ## Step 1 — Files You Receive
 
 You will be given:
@@ -74,6 +92,13 @@ Do not request additional files. Work with what you have.
 Note at the start of your output which files were provided.
 If `docs/invariants.md` or `docs/incidents.md` were not provided, note that
 the repo should run `@init update` so the shared memory package is complete.
+
+**Check `## Repo-Specific Review Context` above:** if blocks have been
+populated by `@init`, use them to extend your review:
+- specialist-surface block: audit whether the specialist rules described
+  are actually reflected in code, tests, and documentation
+- governance-requirements block: verify those requirements are met and
+  that documentation is sufficient to explain them to a new engineer
 
 ---
 

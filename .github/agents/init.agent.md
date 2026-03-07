@@ -38,6 +38,42 @@ Work through every step in sequence. Do not skip steps.
 
 ---
 
+## Step 0A — Self-Install
+
+This is the very first thing that runs, in every mode.
+
+Check whether the framework base agents are present in `.github/agents/`.
+The required framework agents are:
+`init.agent.md`, `code.agent.md`, `phase.gate.agent.md`,
+`testing.error.report.agent.md`, `cold.review.agent.md`,
+`agent-creation.agent.md`, `skill-creation.agent.md`, `cleanup.agent.md`
+
+**If any are missing:**
+
+1. Locate the framework source package. Check these paths in order:
+   a. `~/projects/copilot integrated setup/`
+   b. Any sibling directory of this repo named `copilot integrated setup`
+   c. If not found: ask the user for the path before continuing.
+
+2. Copy the following to this repo using file tools:
+   - All 8 framework agents → `.github/agents/`
+   - `preflight.sh`, `snapshot.sh`, `probe-stack.sh` → `scripts/`
+     (make executable with chmod +x)
+   - All 6 templates → `templates/`
+     If `templates/` already exists for product code, use
+     `templates/copilot-agent-system/` instead to avoid collision.
+   - `AGENT-SYSTEM.md` → `.github/AGENT-SYSTEM.md`
+
+3. Report: "Framework base files installed from `<source path>`."
+
+**If all framework agents are already present:**
+Note: "Framework base files already present — proceeding to scan."
+
+After Step 0A, all framework files exist in the repo and are ready
+for customization in Step 8.
+
+---
+
 ## Mode Detection
 
 Before Step 1, detect your operating mode:
@@ -650,49 +686,114 @@ Generation rules:
 
 ---
 
-## Step 8 — Optional: Generate Repo-Specific Agent Wrappers
+## Step 8 — Customize Agent Files for This Repo
 
-This step is optional. Ask the user before generating wrappers.
+This is the step that makes the framework agents repo-specific. Do not skip it.
+A customized `code.agent.md` tailored to this repo is always more useful than
+a generic one — and the user then just calls `@code` for any task without
+needing to know which specialist agent to pick.
 
-Offer to generate repo-specific agent wrappers if:
-- Step 1B found existing custom agents that would benefit from framework wrapping
-- The repo has complex special workflows that need named agent files
-- The user asked for named agents (e.g. `adaptabot-code.agent.md`)
+For each of the three core agent files in `.github/agents/`, locate the
+`<!-- REPO-CUSTOM: <name>` blocks and replace the content between the
+`<!-- REPO-CUSTOM: ... -->` opening and `END-REPO-CUSTOM -->` closing
+lines with repo-specific content derived from Steps 1A, 1B, 2, and 7.
+Write the updated file back to `.github/agents/` — this overwrites the
+base template with the repo-tailored version.
 
-If generating wrappers, follow this pattern:
-- Keep the generic step flow from the framework core agent intact
-- Prepend the repo profile and registry read order
-- Add repo-specific completion gates after the generic ones
-- Save to `.github/agents/<reponame>-<agent>.agent.md`
+### 8.1 — Customize `.github/agents/code.agent.md`
 
-A wrapper should look like:
-```
----
-name: <reponame>-code
-description: >
-  Repo-specific code agent for <repo>. Extends the generic code agent
-  with <repo> context, validators, and workflows. Run @<reponame>-code
-  instead of @code on this repo.
----
+Locate the `## Repo Configuration` section and fill in:
 
-<!-- Extends: code.agent — read that first for full workflow -->
+**`REPO-CUSTOM: pre-coding-reads`**
+List the additional files a coder MUST read before touching this repo's
+code, in the order they must be read:
+- From ingest: any authoritative DEVPLAN, GUARDRAILS, architecture docs,
+  design contracts (e.g. DEVPLAN_v8.md, GUARDRAILS_v8.md, PHASE_2_3_SKETCH.md)
+- From Step 2: any critical path docs the user specified
+- From governance docs: COPILOT_INSTRUCTIONS.md, docs/workflow.md, etc.
+  if they are the stated source of truth for this repo
+- Generic repos: if no mandatory additional reads exist, write "None."
 
-# <Repo> Code Agent
+**`REPO-CUSTOM: forbidden-patterns`**
+List all hard "never do this" constraints as bullet points:
+- From existing specialist agents (if found in Step 1B): extract every
+  bullet in "What you never do" or "What you never..." sections verbatim
+- From GUARDRAILS.md / GUARDRAILS_v8.md: extract module boundary rules,
+  banned imports, banned functions, banned patterns
+- From Step 2 user answers: any hard constraints stated
+- From COPILOT_INSTRUCTIONS.md or HOW_TO_COMPLY.md if present
+- Generic repos with no constraints: write "None — follow baseline guardrails."
 
-## Repo override — read these before Step 0 of code.agent
+**`REPO-CUSTOM: completion-gate`**
+List the exact commands and checks that define task-complete for this repo:
+- From existing specialist agents: extract every "Phase completion gate"
+  or "Completion bar" section verbatim
+- From CI config: which checks must pass before merge
+- From validation-registry.md if generated: list the "run every change" entries
+- Generic repos: write "Standard: tests pass, lint passes, Step 8 checklist."
 
-1. `docs/agent-system/repo-profile.md` — stack, validators, workflows
-2. `docs/agent-system/validation-registry.md` — exact validator commands
-3. `docs/agent-system/workflow-registry.md` — special workflows for this repo
+**`REPO-CUSTOM: remediation-mode`**
+Describe how to handle fix manifests or phase-gate failures in this repo:
+- If the repo's existing agent had a named remediation pattern (e.g.
+  `@agent-name fix-phase` or FIX MANIFEST mode), reproduce those steps here
+- Generic repos: keep the default text already in the block.
 
-Then follow code.agent steps exactly, substituting repo profile values
-where the generic agent says "use REPO.context.md".
+### 8.2 — Customize `.github/agents/phase.gate.agent.md`
 
-## Repo-specific completion gates
+Locate the `## Repo-Specific Verification Contracts` section and fill in:
 
-Before Step 9 (decision record), also verify:
-<list any repo-specific gates beyond the generic checklist>
-```
+**`REPO-CUSTOM: validation-scripts`**
+List all repo-specific validator commands:
+- From validation-registry.md if generated: list as `script.py — command`
+- From Step 1B scan: any `scripts/validate_*.py` or `scripts/check_*.py` found
+- Generic repos with no custom validators: write "None — use validation-registry.md."
+
+**`REPO-CUSTOM: critical-transitions`**
+If the repo uses multi-phase development and data contracts were found:
+- List each phase boundary (e.g. "Phase 1 → Phase 2")
+- List the data contracts: function signatures, type fields, exports that must
+  match across the boundary
+- Extract these from DEVPLAN documents if present
+- Include any known fragile transitions from existing phase-gate agents
+- Generic repos: write "None — verify contracts according to generic Step 3."
+
+**`REPO-CUSTOM: governance-gates`**
+If the repo has special governance requirements:
+- From existing specialist agents: extract all gate descriptions
+  (DPIA gates, human approval requirements, security gates, audit requirements)
+- From GUARDRAILS.md or HOW_TO_COMPLY.md if governance docs exist
+- Generic repos: write "None — use baseline guardrails."
+
+### 8.3 — Customize `.github/agents/cold.review.agent.md`
+
+Locate the `## Repo-Specific Review Context` section and fill in only
+if the repo has meaningful specialist knowledge:
+
+**`REPO-CUSTOM: specialist-surface`**
+If the repo has specialist agents with deep domain rules:
+- Summarise the specialist rules in one paragraph per domain
+  (e.g. "Security pipeline: spotlighting required on all external content,
+  output schema enforcer must catch all free-text responses, vault mapping
+  contract is Dict[str, Dict[str, str]]")
+- This gives cold.review enough context to audit whether the specialist
+  rules are documented and honoured in the codebase
+- Generic repos: write "No specialist rules — review against baseline only."
+
+**`REPO-CUSTOM: governance-requirements`**
+If the repo has compliance/governance obligations:
+- List them concisely (DPIA, local-only data processing, human verdict
+  requirements, audit schema constraints, etc.)
+- Enables cold.review to check that docs describe these requirements
+  clearly enough for a new engineer
+- Generic repos: write "No special governance — baseline guardrails only."
+
+### 8.4 — Report
+
+After customizing each agent, report:
+- Which REPO-CUSTOM blocks were filled with repo-specific content
+- Which blocks were left at generic defaults (and why)
+- Final confirmation: "Agent files customized. The user can now call
+  `@code` for any coding task — it is tailored to this repo."
 
 ---
 
@@ -700,21 +801,24 @@ Before Step 9 (decision record), also verify:
 
 Tell the user:
 
-1. What was created or updated (list all files)
-2. What extension files were generated and what they enable
-3. What automation assets were generated from templates and what they do
-4. What naming or path issues were found (if any) and what to do
-5. What existing assets were inventoried and their recommended status
-6. What to do next:
+1. What was installed (framework base files from Step 0A, if not already present)
+2. What was created or updated (list all files from Steps 3–7)
+3. What extension files were generated and what they enable
+4. What automation assets were generated from templates and what they do
+5. What agent files were customized (Step 8) and a one-line summary of what
+   was inserted into each REPO-CUSTOM block
+6. What naming or path issues were found (if any) and what to do
+7. What existing assets were inventoried and their recommended status
+8. What to do next:
    - For a new project with a dev plan: `@code phase: 1 [attach dev plan]`
    - For an existing project with bugs: `@code fix: [describe bug]`
    - For a new feature: `@code feature: [attach mini dev plan]`
    - If hooks were found: "Run `@init install-hooks` to review hook setup"
-   - If wrappers were offered: note next step
-7. When to re-run init: "Run `@init update` after major architectural
-   changes or when REPO.context.md feels out of date."
-8. Remind the user that phase.gate.agent and cold.review.agent
-   must use a different model from code.agent.
+9. When to re-run init: "Run `@init update` after major architectural
+   changes or when REPO.context.md feels out of date. Run `@init ingest`
+   if you want to re-scan added agents, hooks, or validators."
+10. Remind the user that phase.gate.agent and cold.review.agent
+    must use a different model from code.agent.
 
 ---
 

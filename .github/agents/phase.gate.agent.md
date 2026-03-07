@@ -44,6 +44,30 @@ Work through every step in sequence.
 
 ---
 
+## Repo-Specific Verification Contracts
+
+This section is filled in by `@init` when the framework is set up on a
+specific repo. Generic defaults are shown. If `@init` has run on this
+repo the blocks below contain the actual contracts for it.
+
+### Required validation scripts — repo-specific
+<!-- REPO-CUSTOM: validation-scripts
+None beyond standard validators — use docs/agent-system/validation-registry.md
+if present.
+END-REPO-CUSTOM -->
+
+### Critical phase transitions — repo-specific
+<!-- REPO-CUSTOM: critical-transitions
+None defined — verify all data contracts according to generic Step 3.
+END-REPO-CUSTOM -->
+
+### Governance gates — repo-specific
+<!-- REPO-CUSTOM: governance-gates
+None defined — use baseline guardrails from docs/guardrails/baseline.md.
+END-REPO-CUSTOM -->
+
+---
+
 ## Step 1 — Load Context
 
 Read the following before doing anything else:
@@ -71,6 +95,12 @@ If `docs/invariants.md` or `docs/incidents.md` are missing, treat them as
 empty for this review and note that the repo should run `@init update` to
 restore the shared memory files.
 Do not ask the user for additional context — work from the artifacts.
+
+**Check `## Repo-Specific Verification Contracts` above:** if any blocks
+have been populated by `@init`, apply them throughout your verification:
+- validation-scripts block: run those exact scripts in Step 5
+- critical-transitions block: check those contracts specifically in Step 3
+- governance-gates block: verify those gates hold in Step 4
 
 ---
 

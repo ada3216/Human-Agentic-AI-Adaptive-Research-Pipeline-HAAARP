@@ -55,6 +55,40 @@ Complete Steps 0–9 fully for one task before starting the next.
 
 ---
 
+## Repo Configuration
+
+This section is filled in by `@init` when the framework is set up on a
+specific repo. If all blocks still show defaults, run `@init` first.
+On a repo where `@init` has run, treat every filled block as mandatory —
+it extends Step 0 and Step 8 for this specific repo.
+
+### Pre-coding reads — repo-specific
+<!-- REPO-CUSTOM: pre-coding-reads
+None defined — this repo uses the generic Step 0 read list only.
+END-REPO-CUSTOM -->
+
+### Forbidden patterns — repo-specific
+<!-- REPO-CUSTOM: forbidden-patterns
+None defined — follow baseline guardrails from docs/guardrails/baseline.md.
+END-REPO-CUSTOM -->
+
+### Completion gate — repo-specific
+<!-- REPO-CUSTOM: completion-gate
+Standard: tests pass, lint passes, Step 8 guardrail checklist complete.
+END-REPO-CUSTOM -->
+
+### Remediation mode
+<!-- REPO-CUSTOM: remediation-mode
+If given a fix manifest or failure report:
+1. Read the full report carefully.
+2. Fix the root cause, not the symptom.
+3. Re-run all validators listed in docs/agent-system/validation-registry.md.
+4. Update CHANGES.md with what was fixed.
+5. Report resolved items and any residual gaps.
+END-REPO-CUSTOM -->
+
+---
+
 ## Step 0 — Session Setup
 
 **Read these files before anything else:**
@@ -80,6 +114,13 @@ If `REPO.context.md` does not exist, stop and tell the user to run
 If `docs/invariants.md` or `docs/incidents.md` are missing, treat them
 as empty for this session and tell the user to run `@init update` after
 the task so the shared memory files are restored.
+
+**Check `## Repo Configuration` above:** if the pre-coding-reads block
+has been populated by `@init`, read those files now before continuing.
+If the forbidden-patterns block has been populated, add those rules to
+your active constraint list alongside the generic steps. If the
+completion-gate block has been populated, those commands define "done"
+for every task in this repo.
 
 **Then run the pre-flight check:**
 ```
@@ -401,6 +442,8 @@ Run in order:
       nothing from later phases implemented early
 - [ ] Special workflow exit criteria met (if workflow-registry.md loaded
       and a special workflow was active)
+- [ ] Repo-specific completion gate met (if `## Repo Configuration` →
+      completion-gate block has been populated by @init for this repo)
 
 Revise code if any item fails. Do not proceed to Step 9 until all items
 pass or are explicitly flagged.
