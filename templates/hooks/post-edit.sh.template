@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Generated from the framework template.
+# Advisory hook for lightweight post-edit checks.
+
+ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$ROOT_DIR"
+
+FORMAT_CMD="${FORMAT_CMD:-__FORMAT_COMMAND__}"
+LINT_CMD="${LINT_CMD:-__LINT_COMMAND__}"
+
+run_if_configured() {
+  local label="$1"
+  local command="$2"
+
+  if [[ -z "$command" || "$command" == __*__ ]]; then
+    echo "[post-edit] Skipping $label: no command configured"
+    return 0
+  fi
+
+  echo "[post-edit] Running $label"
+  eval "$command" || echo "[post-edit] $label reported issues"
+}
+
+run_if_configured "format" "$FORMAT_CMD"
+run_if_configured "lint" "$LINT_CMD"

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Generated from the framework template.
+# Use this hook to surface repo context at the start of an agent session.
+
+ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$ROOT_DIR"
+
+if [[ -f "REPO.context.md" ]]; then
+  echo "[session-start] REPO.context.md found"
+  sed -n '1,80p' REPO.context.md
+else
+  echo "[session-start] REPO.context.md not found. Run @init first."
+fi
+
+if [[ -f "docs/agent-system/repo-profile.md" ]]; then
+  echo "[session-start] repo-profile.md found"
+  sed -n '1,80p' docs/agent-system/repo-profile.md
+fi

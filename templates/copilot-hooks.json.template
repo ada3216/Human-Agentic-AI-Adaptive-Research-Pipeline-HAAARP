@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/schema",
+  "name": "__REPO_NAME__ hooks",
+  "hooks": [
+    {
+      "name": "session-start",
+      "trigger": "SessionStart",
+      "command": "scripts/hooks/session-start.sh",
+      "description": "Load repo context at the start of a session"
+    },
+    {
+      "name": "post-edit",
+      "trigger": "PostToolUse",
+      "command": "scripts/hooks/post-edit.sh",
+      "description": "Run lightweight advisory checks after edits"
+    }
+  ]
+}

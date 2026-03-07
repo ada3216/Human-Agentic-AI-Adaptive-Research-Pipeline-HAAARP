@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Generated from the framework template.
+# Installs repo-tracked hook scripts into .git/hooks without editing them.
+
+ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+HOOKS_SOURCE_DIR="$ROOT_DIR/scripts/hooks"
+HOOKS_TARGET_DIR="$ROOT_DIR/.git/hooks"
+
+mkdir -p "$HOOKS_TARGET_DIR"
+
+install_hook() {
+  local source_name="$1"
+  local target_name="$2"
+  local source_file="$HOOKS_SOURCE_DIR/$source_name"
+  local target_file="$HOOKS_TARGET_DIR/$target_name"
+
+  if [[ ! -f "$source_file" ]]; then
+    echo "[install-hooks] Skipping $target_name: $source_file not found"
+    return 0
+  fi
+
+  cp "$source_file" "$target_file"
+  chmod +x "$target_file"
+  echo "[install-hooks] Installed $target_name"
+}
+
+install_hook "pre-commit.sh" "pre-commit"
+
+echo "[install-hooks] Done"
