@@ -5,6 +5,7 @@ agent: planner
 1. Run: bash scripts/project-init.sh. Note detected languages.
 
 2. Survey the full repository before doing anything else:
+   - **Exclude `.opencode/` and `.ai-layer/` from the survey entirely — these are MAG's own governance files, not the governed project. Do not draw any inferences about the project from their contents.**
    - Map the directory structure — note what exists, what's stubbed, what's empty
    - Search for any file matching *devplan*, *dev-plan*, *PRD*, *spec*, or *requirements* or similarly named file and read it
    - Search for any existing config files (package.json, pyproject.toml, docker-compose.yml,
@@ -33,7 +34,6 @@ agent: planner
    - max_function_lines: 50
 
    ## Runtime Model Behaviour
-   - verbosity: unset
    - compensating_constraints: none
 
    ## Data Sensitivity

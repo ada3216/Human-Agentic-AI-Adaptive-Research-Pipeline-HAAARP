@@ -1,0 +1,2 @@
+# shellcheck shell=bash
+# Rule intent: keep shell modules within manageable reviewed scope.

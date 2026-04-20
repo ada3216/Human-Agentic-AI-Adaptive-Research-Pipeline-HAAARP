@@ -1,0 +1,2 @@
+[lint]
+dummy-variable-rgx = "^(_|ignored_[a-z0-9_]+)$"

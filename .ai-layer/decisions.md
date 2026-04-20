@@ -42,3 +42,5 @@ DATE: 2026-04-20 | IMPLEMENT | Rewrite ARCHITECTURE.md as generalized governance
 DATE: 2026-04-20 | REVIEW_ATTEST | switched: no | reason: Same provider session — no second provider available in this invocation | policy: recommended
 DATE: 2026-04-20 | REVIEW_PASS | Rewrite ARCHITECTURE.md as generalized governance-first system | slot B
 DATE: 2026-04-20 | PLAIN_SUMMARY | Rewrite ARCHITECTURE.md as generalized governance-first system | Replaced the ARCHITECTURE.md placeholder with a clean, domain-agnostic governance baseline covering system purpose, user roles, non-negotiable patterns, hard constraints, data flow categories, and project ethos. No secrets or sensitive data are involved — this is a documentation change that shapes how future planners and reviewers understand the system's rules and boundaries.
+DATE: 2026-04-20 | INIT | project: Agentic Human–AI Research Pipeline | languages: TypeScript,JavaScript,Python,Shell | data_sensitivity: sensitive | rules confirmed: 8
+DATE: 2026-04-20 | PLAN | Complete project initialization from confirmed decisions | scope: STRUCTURAL | risk: MEDIUM
