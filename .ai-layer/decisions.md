@@ -38,3 +38,4 @@ DATE: 2026-04-19 | REVIEW_PASS | Phase 6 — Project Commands + Workflow Skill |
 DATE: 2026-04-19 | PLAIN_SUMMARY | Phase 6 — Project Commands + Workflow Skill | Fixed the Phase 0 identity regression by introducing a script that keeps the agent name synced with the active auth context across all files, allowing tests to pass reliably without breaking the user session. All 44 Phase 6 checks and full regression pass.
 DATE: 2026-04-20 | AUTO_RESET | Stale phase planning cleared at session start.
 DATE: 2026-04-20 | PLAN | Rewrite ARCHITECTURE.md as generalized governance-first system | scope: CONTAINED | risk: MEDIUM
+DATE: 2026-04-20 | IMPLEMENT | Rewrite ARCHITECTURE.md as generalized governance-first system | complete | slot was: A | commit: 380481a

@@ -1,5 +1,5 @@
 ---
-name: mag-student
+name: mag-business
 mode: primary
 description: Magentica 2.0 orchestrator. Routes commands to subagents. Manages session-start state check.
 ---
