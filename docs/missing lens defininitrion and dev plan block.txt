@@ -1,0 +1,71 @@
+Conceptual definition (paper-ready prose to add to the Stability testing section):
+
+The lens amplification index (LAI) is computed as follows. All observations in Pass 2 that are absent from Pass 1 are identified using normalised Jaccard similarity on claim text — an observation is considered "new" if its similarity to every Pass 1 observation falls below 0.6. For each new Pass 2 observation, a lens vocabulary coverage score is computed: the proportion of the observation's content-bearing terms (after stopword removal) that appear in the researcher's stated lens vocabulary set, drawn from the lens dialogue record. An observation is classified as lens-driven if its lens vocabulary coverage score exceeds 0.4 and the grounding verification record shows either no supporting excerpts or excerpts that contain exclusively lens vocabulary terms without independent paraphrase. The LAI is the proportion of new Pass 2 observations that are lens-driven by this criterion. A value of 0.0 indicates that all new Pass 2 observations have independent evidential grounding. A value of 1.0 indicates that every novel observation introduced by the positioned second pass depends entirely on the researcher's own vocabulary to make sense, with no independent data signal. The methodologically significant threshold is 0.5: an LAI above this value should be disclosed in the methods section and noted in the audit bundle, as it suggests the second pass may be amplifying the researcher's frame rather than finding independent confirmation of it. An LAI of 0.0 is not the target — the lens is meant to shape the analysis. The target is an LAI low enough that the new observations can be distinguished from echo.
+
+
+Implementation spec for compute_stability_metrics():
+pythondef compute_lens_amplification_index(
+    pass1_output: dict,
+    pass2_output: dict,
+    lens_record: dict,
+    grounding_records: list[dict]
+) -> dict:
+    """
+    Computes the lens amplification index.
+    
+    Returns:
+      {
+        "lens_amplification_index": float,     # 0.0–1.0
+        "new_observations_count": int,          # total Pass 2 observations absent from Pass 1
+        "lens_driven_count": int,               # of those, how many are lens-driven
+        "lens_vocabulary_used": list[str],      # terms from lens that appeared in new observations
+        "amplification_flag": bool,             # True if LAI > 0.5
+        "lai_note": str                         # human-readable interpretation
+      }
+    
+    Algorithm:
+    
+    1. Extract lens vocabulary set from lens_record["lens_summary"]:
+       - theoretical orientation terms
+       - explicitly stated lens vocabulary list (lens_dialogue Q4 response)
+       - working hypothesis key terms (Q3 response)
+       Combine, lowercase, remove stopwords → lens_vocab_set: set[str]
+    
+    2. Extract observations from pass1 and pass2 outputs.
+       Normalise each: lowercase, strip punctuation, remove stopwords.
+       
+    3. For each pass2_observation:
+       - compute Jaccard(pass2_obs_terms, pass1_obs_terms) for every pass1_observation
+       - if max Jaccard < 0.6: mark as NEW
+    
+    4. For each NEW pass2_observation:
+       - obs_terms = content-bearing terms (after stopwords)
+       - lens_coverage = |obs_terms ∩ lens_vocab_set| / |obs_terms|
+       - check grounding record for this observation:
+           has_independent_excerpts = any excerpt whose text does NOT consist 
+           solely of lens vocabulary terms (check each excerpt term not in lens_vocab_set)
+       - is_lens_driven = (lens_coverage >= 0.4) AND (NOT has_independent_excerpts)
+    
+    5. LAI = lens_driven_count / new_observations_count
+       (if new_observations_count == 0: LAI = 0.0, note "Pass 2 produced no observations
+        absent from Pass 1 — lens had no additive effect")
+    
+    6. amplification_flag = LAI > 0.5
+    
+    Interpretation bands for lai_note:
+      0.0:        "No lens amplification detected. All new Pass 2 observations have 
+                   independent evidential grounding."
+      0.0–0.2:    "Low amplification. Lens shaped framing but new observations are 
+                   primarily data-grounded."
+      0.2–0.4:    "Moderate amplification. Expected range for positioned analysis. 
+                   Disclose in methods."
+      0.4–0.5:    "Elevated amplification. Recommend reviewer attention to new Pass 2 
+                   observations for lens-echo before accepting."
+      > 0.5:      "High amplification. The majority of new Pass 2 observations appear 
+                   to reflect the researcher's lens vocabulary rather than independent 
+                   data signals. Include this value and a reflexive note in the audit 
+                   bundle and methods section. This does not invalidate the analysis — 
+                   it is a finding about the analysis."
+    """
+
+One design note worth considering: the 0.4 lens_coverage threshold is the most empirically uncertain part of this. Once the pipeline has been run on real data, you'll be able to calibrate whether 0.4 is the right cut. The algorithm and the interpretation bands are principled now, but the threshold should be documented as provisional in the methods section and potentially adjusted based on the first empirical evaluation. The flag at 0.5 LAI is the right disclosure threshold — that's the point where the concern becomes methodologically substantive rather than expected.

@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic Analysis Workflow</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2128;
+    --border: #30363d;
+    --border-bright: #484f58;
+    --text: #e6edf3;
+    --text-muted: #7d8590;
+    --text-dim: #4d5566;
+
+    --phase0: #58a6ff;
+    --phase1: #3fb950;
+    --phase2: #d2a8ff;
+    --phase3: #ffa657;
+    --phase4: #ff7b72;
+    --phase5: #f0883e;
+
+    --human: #ffa657;
+    --ai: #58a6ff;
+    --auto: #3fb950;
+
+    --tag-h: rgba(255,166,87,0.15);
+    --tag-a: rgba(88,166,255,0.15);
+    --tag-auto: rgba(63,185,80,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 56px 36px 100px;
+  }
+
+  /* Header */
+  .doc-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 32px;
+    margin-bottom: 44px;
+  }
+
+  .doc-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+
+  .doc-title {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .doc-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-bottom: 20px;
+  }
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 2px;
+    border: 1px solid;
+    letter-spacing: 0.08em;
+  }
+
+  .badge.human { color: var(--human); border-color: var(--human); background: var(--tag-h); }
+  .badge.ai { color: var(--ai); border-color: var(--ai); background: var(--tag-a); }
+  .badge.auto { color: var(--auto); border-color: var(--auto); background: var(--tag-auto); }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    margin-bottom: 40px;
+    align-items: center;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Hours summary bar */
+  .hours-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px 24px;
+    margin-bottom: 48px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+  }
+
+  .hours-item {}
+  .hours-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .hours-val {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .hours-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  /* Phase block */
+  .phase {
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .phase-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    flex-shrink: 0;
+    border: 1px solid;
+  }
+
+  .phase-title {
+    font-size: 16px;
+    font-weight: 600;
+    flex: 1;
+  }
+
+  .phase-hours {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: right;
+  }
+
+  .phase-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 16px;
+    line-height: 1.6;
+    padding-left: 40px;
+  }
+
+  /* Step cards */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-left: 40px;
+  }
+
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+
+  .step:hover {
+    border-color: var(--border-bright);
+  }
+
+  .step-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .step-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    border: 1px solid;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  .step-tag.human { color: var(--human); border-color: var(--human); background: var(--tag-h); }
+  .step-tag.ai { color: var(--ai); border-color: var(--ai); background: var(--tag-a); }
+  .step-tag.auto { color: var(--auto); border-color: var(--auto); background: var(--tag-auto); }
+
+  .step-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .step-detail {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    padding-left: 0;
+  }
+
+  .step-detail ul {
+    list-style: none;
+    margin-top: 6px;
+  }
+
+  .step-detail ul li {
+    padding: 2px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .step-detail ul li::before {
+    content: "›";
+    position: absolute;
+    left: 0;
+    color: var(--text-dim);
+  }
+
+  .step-output {
+    margin-top: 8px;
+    padding: 7px 10px;
+    background: var(--surface2);
+    border-left: 2px solid var(--border-bright);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .step-output::before {
+    content: "output → ";
+    color: var(--text-dim);
+  }
+
+  /* Connector */
+  .connector {
+    display: flex;
+    align-items: center;
+    padding-left: 40px;
+    margin: 4px 0;
+    gap: 8px;
+  }
+
+  .conn-line {
+    width: 1px;
+    height: 16px;
+    background: var(--border);
+    margin-left: 8px;
+  }
+
+  /* Strand split */
+  .strand-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .strand-block {
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .strand-label {
+    padding: 8px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .strand-label.ipa { background: rgba(210,168,255,0.08); color: var(--phase2); border-bottom-color: rgba(210,168,255,0.2); }
+  .strand-label.pda { background: rgba(88,166,255,0.08); color: var(--phase0); border-bottom-color: rgba(88,166,255,0.2); }
+
+  .strand-steps {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .mini-step {
+    padding: 8px 10px;
+    background: var(--surface2);
+    font-size: 12px;
+    line-height: 1.5;
+    border-left: 2px solid var(--border);
+  }
+
+  .mini-step.human { border-left-color: var(--human); }
+  .mini-step.ai { border-left-color: var(--ai); }
+  .mini-step.auto { border-left-color: var(--auto); }
+
+  .mini-step-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    margin-bottom: 3px;
+    letter-spacing: 0.05em;
+  }
+
+  .mini-step-label.human { color: var(--human); }
+  .mini-step-label.ai { color: var(--ai); }
+  .mini-step-label.auto { color: var(--auto); }
+
+  .mini-step-text {
+    color: var(--text-muted);
+    font-size: 11.5px;
+  }
+
+  /* Divider */
+  .phase-divider {
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+    margin: 44px 0;
+  }
+
+  /* Hours table */
+  .hours-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 13px;
+  }
+
+  .hours-table th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hours-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .hours-table tr:last-child td {
+    border-bottom: none;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .hours-table .mono {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+  }
+
+  .hours-table .muted { color: var(--text-muted); }
+
+  .highlight-row td {
+    background: var(--surface2);
+    color: var(--text);
+  }
+
+  /* Footer */
+  .doc-footer {
+    margin-top: 64px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  @media (max-width: 640px) {
+    .page { padding: 32px 16px 60px; }
+    .strand-split { grid-template-columns: 1fr; }
+    .hours-bar { grid-template-columns: 1fr 1fr; }
+    .phase-desc, .steps { padding-left: 0; }
+    .connector { padding-left: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="doc-header">
+    <div class="doc-label">Research Methodology · Agentic AI Workflow · MScPsychotherapy Dissertation</div>
+    <h1 class="doc-title">Agentic Analysis Workflow Design</h1>
+    <div class="doc-subtitle">Six-phase human–AI collaborative pipeline for IPA + Psychodynamic Discourse Analysis with lens-informed two-pass architecture</div>
+    <div class="tag-row">
+      <span class="badge auto">● automated</span>
+      <span class="badge ai">● ai-primary</span>
+      <span class="badge human">● human-primary</span>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-muted); margin-left:4px;">— step types throughout</span>
+    </div>
+  </div>
+
+  <!-- Summary hours bar -->
+  <div class="hours-bar">
+    <div class="hours-item">
+      <div class="hours-label">Total Est. Human Hours</div>
+      <div class="hours-val" style="color:var(--human)">190–265</div>
+      <div class="hours-sub">with lens protocol applied</div>
+    </div>
+    <div class="hours-item">
+      <div class="hours-label">Framework Build</div>
+      <div class="hours-val" style="color:var(--ai)">50–80</div>
+      <div class="hours-sub">included in total above</div>
+    </div>
+    <div class="hours-item">
+      <div class="hours-label">Analysis (IPA + PDA)</div>
+      <div class="hours-val" style="color:var(--phase2)">95–130</div>
+      <div class="hours-sub">human oversight only</div>
+    </div>
+    <div class="hours-item">
+      <div class="hours-label">Writing & Synthesis</div>
+      <div class="hours-val" style="color:var(--phase3)">60–80</div>
+      <div class="hours-sub">inc. triangulation</div>
+    </div>
+    <div class="hours-item">
+      <div class="hours-label">AI Reduction vs. Unaided</div>
+      <div class="hours-val" style="color:var(--auto)">~55%</div>
+      <div class="hours-sub">lens adds further ~10%</div>
+    </div>
+  </div>
+
+  <!-- PHASE 0 -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-num" style="color:var(--phase0); border-color:var(--phase0)">0</div>
+      <div class="phase-title">Preprocessing Pipeline</div>
+      <div class="phase-hours">~10–15 hrs setup · then fully automated</div>
+    </div>
+    <div class="phase-desc">Build once, run automatically for all transcripts. Takes raw Whisper output and produces clean, structured, analysis-ready JSON. No human involvement in the run — only in setup and quality-checking output.</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-top">
+          <span class="step-tag auto">automated</span>
+          <div class="step-title">Whisper transcription + diarisation</div>
+        </div>
+        <div class="step-detail">Run locally via whisper.cpp or faster-whisper on your 3090s. Diarisation agent separates therapist and client turns using speaker labels. All processing offline — no data leaves machine.
+          <ul>
+            <li>Model: large-v3 or distil-large-v3 for speed/accuracy balance</li>
+            <li>Output: raw transcript with speaker tags and timestamps</li>
+            <li>Flag low-confidence segments for human review</li>
+          </ul>
+        </div>
+        <div class="step-output">timestamped JSON with speaker labels + confidence scores per segment</div>
+      </div>
+
+      <div class="step">
+        <div class="step-top">
+          <span class="step-tag auto">automated</span>
+          <div class="step-title">Transcript cleaning and normalisation agent</div>
+        </div>
+        <div class="step-detail">Removes disfluencies (where analytically irrelevant), standardises formatting, handles overlapping speech, produces clean readable version alongside preserved raw version.
+          <ul>
+            <li>Preserves paralinguistic features (pauses, laughter, emphasis) in annotation layer</li>
+            <li>Produces two versions: clean read and analytic notation version</li>
+          </ul>
+        </div>
+        <div class="step-output">clean_transcript.json + annotated_transcript.json per session</div>
+      </div>
+
+      <div class="step">
+        <div class="step-top">
+          <span class="step-tag human">human check</span>
+          <div class="step-title">Spot-check and sign-off on transcription quality</div>
+        </div>
+        <div class="step-detail">Review flagged low-confidence segments. Correct diarisation errors where therapist/client turns were misassigned. Estimated 20–30 mins per transcript.
+        </div>
+        <div class="step-output">verified, locked transcript set ready for analysis phases</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-divider"></div>
+
+  <!-- PHASE 1 -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-num" style="color:var(--phase1); border-color:var(--phase1)">1</div>
+      <div class="phase-title">Pass 1 — Blind Analysis (No Researcher Lens)</div>
+      <div class="phase-hours">~15–20 hrs human · AI runs overnight</div>
+    </div>
+    <div class="phase-desc">The AI reads all data with no framing — no theoretical context, no researcher positionality, no hypotheses. This produces a genuine baseline and prevents the lens from dominating the data. Both strands run simultaneously.</div>
+
+    <div class="strand-split">
+      <div class="strand-block">
+        <div class="strand-label ipa">IPA Strand — Interviews</div>
+        <div class="strand-steps">
+          <div class="mini-step ai">
+            <div class="mini-step-label ai">AI agent</div>
+            <div class="mini-step-text">Initial noticing pass — descriptive, linguistic, and conceptual annotations on each interview transcript. No clustering yet.</div>
+          </div>
+          <div class="mini-step ai">
+            <div class="mini-step-label ai">AI agent</div>
+            <div class="mini-step-text">Candidate experiential statement extraction — what does this participant seem to be saying about their experience? Surface-level only.</div>
+          </div>
+          <div class="mini-step ai">
+            <div class="mini-step-label ai">AI agent</div>
+            <div class="mini-step-text">Initial emergent themes per participant — grouped candidate statements. No cross-case work yet.</div>
+          </div>
+          <div class="mini-step human">
+            <div class="mini-step-label human">human review</div>
+            <div class="mini-step-text">Read Pass 1 IPA output. Note what surprises you. Do not analyse yet — this feeds the lens conversation.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="strand-block">
+        <div class="strand-label pda">PDA Strand — Session Transcripts</div>
+        <div class="strand-steps">
+          <div class="mini-step ai">
+            <div class="mini-step-label ai">AI agent</div>
+            <div class="mini-step-text">Discourse feature extraction — subject positions, pronoun use, modality, hedging, metaphor clusters, turn length patterns per session.</div>
+          </div>
+          <div class="mini-step ai">
+            <div class="mini-step-label ai">AI agent</div>
+            <div class="mini-step-text">Relational moment flagging — turn sequences with elevated intensity, topic avoidance, repair attempts, significant silences or interruptions.</div>
+          </div>
+          <div class="mini-step ai">
+            <div class="mini-step-label ai">AI agent</div>
+            <div class="mini-step-text">Session-level summary — dominant relational register, notable shifts in discourse tone, any unusual or striking features.</div>
+          </div>
+          <div class="mini-step human">
+            <div class="mini-step-label human">human review</div>
+            <div class="mini-step-text">Skim PDA Pass 1 output. Note anything clinically striking. Feed observations into lens conversation.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-divider"></div>
+
+  <!-- PHASE 2 -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-num" style="color:var(--phase2); border-color:var(--phase2)">2</div>
+      <div class="phase-title">Lens Conversation — Researcher Positionality Dialogue</div>
+      <div class="phase-hours">~4–6 hrs · human-led</div>
+    </div>
+    <div class="phase-desc">The pivot point of the entire workflow. Researcher conducts a structured dialogue with the AI using the Lens Protocol document. The output — the Researcher Lens Summary — frames all subsequent analysis. See the Lens Protocol document for full question set.</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-top">
+          <span class="step-tag human">human-led dialogue</span>
+          <div class="step-title">Structured reflexivity conversation with AI</div>
+        </div>
+        <div class="step-detail">Work through all seven sections of the Lens Protocol. AI asks follow-up questions where useful. Researcher shares theoretical commitments, positionality, hypotheses, and reactions to Pass 1 output.
+          <ul>
+            <li>Cover: theoretical positioning, positionality, hypothesis mapping, disconfirmation mandate</li>
+            <li>Share what surprised you in Pass 1</li>
+            <li>Be specific about psychodynamic vocabulary you want the AI to be sensitive to</li>
+          </ul>
+        </div>
+        <div class="step-output">conversational transcript of lens dialogue — save in full for methodology appendix</div>
+      </div>
+
+      <div class="step">
+        <div class="step-top">
+          <span class="step-tag ai">AI output</span>
+          <div class="step-title">AI produces Researcher Lens Summary document</div>
+        </div>
+        <div class="step-detail">AI synthesises the conversation into a structured positionality document: theoretical frame, hypotheses, concepts to be sensitive to, disconfirmation mandate. Researcher reviews and confirms accuracy before Pass 2 begins.
+        </div>
+        <div class="step-output">researcher_lens_summary.md — confirmed by researcher, locked as analysis frame for Pass 2</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-divider"></div>
+
+  <!-- PHASE 3 -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-num" style="color:var(--phase3); border-color:var(--phase3)">3</div>
+      <div class="phase-title">Pass 2 — Lens-Informed Interpretive Analysis</div>
+      <div class="phase-hours">~35–50 hrs human · AI runs overnight per strand</div>
+    </div>
+    <div class="phase-desc">The AI re-analyses all data through the researcher lens. This is the primary analytic pass. The AI now has enough context to attempt genuine interpretive work, not just pattern recognition. Human role here shifts from generating to evaluating and refining.</div>
+
+    <div class="strand-split">
+      <div class="strand-block">
+        <div class="strand-label ipa">IPA Strand — Pass 2</div>
+        <div class="strand-steps">
+          <div class="mini-step ai">
+            <div class="mini-step-label ai">AI agent</div>
+            <div class="mini-step-text">Lens-positioned reannotation — revisit all initial annotations through the researcher's theoretical frame. Flag which annotations shift meaning when the lens is applied.</div>
+          </div>
+          <div class="mini-step ai">
+            <div class="mini-step-label ai">AI agent</div>
+            <div class="mini-step-text">Personal Experiential Theme (PET) development per participant — second-order interpretation, moving from description to meaning. Draft 3–6 PETs per participant with supporting extracts.</div>
+          </div>
+          <div class="mini-step ai">
+            <div class="mini-step-label ai">AI agent — disconfirmation pass</div>
+            <div class="mini-step-text">Explicit review: what in this participant's data does NOT fit the researcher lens? What resists the frame? These are marked separately with confidence rating.</div>
+          </div>
+          <div class="mini-step human">
+            <div class="mini-step-label human">human interpretive layer</div>
+            <div class="mini-step-text">Review AI-proposed PETs. Accept, revise, reject, or combine. Write interpretive commentary. Add the double-hermeneutic layer — what does the researcher make of what the participant is making of their experience?</div>
+          </div>
+          <div class="mini-step ai">
+            <div class="mini-step-label ai">AI agent</div>
+            <div class="mini-step-text">Cross-case analysis — map PETs across all participants. Propose Group Experiential Themes (GETs) with convergence/divergence mapping. Flag idiographic outliers.</div>
+          </div>
+          <div class="mini-step human">
+            <div class="mini-step-label human">human sign-off</div>
+            <div class="mini-step-text">Accept/revise GETs. Write final IPA interpretive narrative per theme.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="strand-block">
+        <div class="strand-label pda">PDA Strand — Pass 2</div>
+        <div class="strand-steps">
+          <div class="mini-step ai">
+            <div class="mini-step-label ai">AI agent</div>
+            <div class="mini-step-text">Lens-positioned discourse reannotation — revisit flagged relational moments through Avdi & Georgaca framework. Apply researcher's named psychodynamic concepts as interpretive lens.</div>
+          </div>
+          <div class="mini-step ai">
+            <div class="mini-step-label ai">AI agent</div>
+            <div class="mini-step-text">Subject position analysis — how does each participant construct and negotiate their subject position in relation to the therapist across sessions 1→3? Track shifts in positioning.</div>
+          </div>
+          <div class="mini-step ai">
+            <div class="mini-step-label ai">AI agent</div>
+            <div class="mini-step-text">Transference/countertransference marker analysis — flag linguistic and interactional features consistent with transferential dynamics. Rate confidence. Note where evidence is ambiguous.</div>
+          </div>
+          <div class="mini-step ai">
+            <div class="mini-step-label ai">AI agent — disconfirmation pass</div>
+            <div class="mini-step-text">What discursive material resists psychodynamic interpretation? What appears relationally neutral or unremarkable against expectations? Flagged separately.</div>
+          </div>
+          <div class="mini-step human">
+            <div class="mini-step-label human">human interpretive layer</div>
+            <div class="mini-step-text">Apply clinical and psychodynamic interpretive judgment to AI-flagged moments. This is the step that requires practitioner knowledge — what do these discourse patterns mean relationally and psychodynamically?</div>
+          </div>
+          <div class="mini-step ai">
+            <div class="mini-step-label ai">AI agent</div>
+            <div class="mini-step-text">Cross-session and cross-participant pattern synthesis — how do discourse patterns evolve across three sessions? What is consistent across participants?</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-divider"></div>
+
+  <!-- PHASE 4 -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-num" style="color:var(--phase4); border-color:var(--phase4)">4</div>
+      <div class="phase-title">Triangulation — Cross-Strand Synthesis</div>
+      <div class="phase-hours">~15–20 hrs human · AI produces mapping framework</div>
+    </div>
+    <div class="phase-desc">Where the two strands are brought into dialogue. The AI produces the convergence/divergence map; the researcher does the interpretive synthesis. The gap between what participants said in interview and what happened discursively in sessions is often where the most analytically interesting findings live.</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-top">
+          <span class="step-tag ai">AI agent</span>
+          <div class="step-title">Cross-strand mapping — IPA themes × PDA patterns</div>
+        </div>
+        <div class="step-detail">For each participant: map IPA Group Experiential Themes against PDA discourse patterns. Produce a convergence/divergence matrix. Flag:
+          <ul>
+            <li>Where reported experience (IPA) and enacted discourse (PDA) align</li>
+            <li>Where they diverge — participant says X but discourse shows Y</li>
+            <li>Where the PDA reveals something not accessed by interview at all</li>
+            <li>Where the IPA provides meaning that the PDA alone could not produce</li>
+          </ul>
+        </div>
+        <div class="step-output">triangulation_matrix.md — per participant and across participants</div>
+      </div>
+
+      <div class="step">
+        <div class="step-top">
+          <span class="step-tag ai">AI agent</span>
+          <div class="step-title">Pass 1 vs Pass 2 delta analysis</div>
+        </div>
+        <div class="step-detail">Compare blind pass and lens-informed pass outputs systematically. What did the lens illuminate that blind reading missed? What did blind reading surface that the lens tended to overlook? This delta is part of your methodological transparency and reflexivity argument.
+        </div>
+        <div class="step-output">lens_delta_report.md — included in methodology appendix</div>
+      </div>
+
+      <div class="step">
+        <div class="step-top">
+          <span class="step-tag human">human synthesis</span>
+          <div class="step-title">Interpretive triangulation — researcher writes cross-strand findings</div>
+        </div>
+        <div class="step-detail">This is the irreducibly human step. Using the AI-produced mapping as scaffolding, the researcher writes the interpretive narrative that makes sense of convergences and divergences across both strands. This is where your clinical knowledge, theoretical depth, and understanding of the therapeutic relationship is most necessary.
+        </div>
+        <div class="step-output">triangulated findings narrative — feeds directly into dissertation findings chapter</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-divider"></div>
+
+  <!-- PHASE 5 -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-num" style="color:var(--phase5); border-color:var(--phase5)">5</div>
+      <div class="phase-title">Write-Up Scaffolding & Framework Build</div>
+      <div class="phase-hours">~60–80 hrs total (inc. framework build)</div>
+    </div>
+    <div class="phase-desc">Includes both the technical build of the agentic framework itself (done before any data arrives) and the write-up phase. AI assists significantly with both.</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-top">
+          <span class="step-tag ai">AI-assisted build</span>
+          <div class="step-title">Agentic framework construction</div>
+        </div>
+        <div class="step-detail">Build the agent pipeline before data collection begins. Use your existing experience with opencode / copilot agents. AI writes the majority of the code and prompt engineering.
+          <ul>
+            <li>Whisper preprocessing pipeline — ~10 hrs</li>
+            <li>IPA annotation and clustering agents — ~15 hrs</li>
+            <li>PDA discourse feature and relational moment agents — ~15 hrs</li>
+            <li>Triangulation mapping agent — ~8 hrs</li>
+            <li>Testing and iteration on synthetic/pilot data — ~10 hrs</li>
+          </ul>
+        </div>
+        <div class="step-output">working local agent pipeline, tested and documented</div>
+      </div>
+
+      <div class="step">
+        <div class="step-top">
+          <span class="step-tag ai">AI-assisted</span>
+          <div class="step-title">Methodology chapter drafting</div>
+        </div>
+        <div class="step-detail">AI drafts methodology chapter sections using your decisions and the audit trail documents produced throughout the process. Researcher edits and deepens. The audit trail created by the two-pass design gives you unusually rich methodological material.
+          <ul>
+            <li>Epistemological positioning — constructivist–interpretivist</li>
+            <li>Rationale for IPA + PDA mixed design</li>
+            <li>Description of human–AI collaborative process with lens protocol</li>
+            <li>Reflexivity section — uses lens conversation transcript and lens summary directly</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-top">
+          <span class="step-tag ai">AI-assisted</span>
+          <div class="step-title">Findings chapter scaffolding</div>
+        </div>
+        <div class="step-detail">AI organises the triangulated findings into chapter structure. Researcher writes the interpretive narrative within that structure. AI assists with academic register, coherence, and structural logic.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-divider"></div>
+
+  <!-- Hours breakdown -->
+  <div class="phase">
+    <div class="phase-header">
+      <div class="phase-num" style="color:var(--text-muted); border-color:var(--border)">∑</div>
+      <div class="phase-title">Full Human Hours Estimate</div>
+      <div class="phase-hours">revised with lens protocol</div>
+    </div>
+
+    <table class="hours-table">
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Without AI</th>
+          <th>AI only (no lens)</th>
+          <th>AI + Lens Protocol</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Preprocessing & transcription QC</td>
+          <td class="mono muted">20–25</td>
+          <td class="mono" style="color:var(--ai)">10–15</td>
+          <td class="mono" style="color:var(--auto)">10–15</td>
+          <td class="muted" style="font-size:11px">lens has no effect here</td>
+        </tr>
+        <tr>
+          <td>Pass 1 — blind analysis</td>
+          <td class="mono muted">—</td>
+          <td class="mono" style="color:var(--ai)">8–12</td>
+          <td class="mono" style="color:var(--auto)">8–12</td>
+          <td class="muted" style="font-size:11px">new step, human review only</td>
+        </tr>
+        <tr>
+          <td>Lens conversation</td>
+          <td class="mono muted">—</td>
+          <td class="mono" style="color:var(--ai)">—</td>
+          <td class="mono" style="color:var(--auto)">4–6</td>
+          <td class="muted" style="font-size:11px">replaces some later reflexivity work</td>
+        </tr>
+        <tr>
+          <td>IPA analysis — human oversight</td>
+          <td class="mono muted">120–150</td>
+          <td class="mono" style="color:var(--ai)">55–70</td>
+          <td class="mono" style="color:var(--auto)">40–55</td>
+          <td class="muted" style="font-size:11px">lens raises AI quality, reduces reviews needed</td>
+        </tr>
+        <tr>
+          <td>PDA analysis — human oversight</td>
+          <td class="mono muted">220–300</td>
+          <td class="mono" style="color:var(--ai)">70–90</td>
+          <td class="mono" style="color:var(--auto)">55–75</td>
+          <td class="muted" style="font-size:11px">biggest AI gain regardless of lens</td>
+        </tr>
+        <tr>
+          <td>Triangulation</td>
+          <td class="mono muted">40–60</td>
+          <td class="mono" style="color:var(--ai)">18–25</td>
+          <td class="mono" style="color:var(--auto)">15–20</td>
+          <td class="muted" style="font-size:11px">AI mapping + human synthesis</td>
+        </tr>
+        <tr>
+          <td>Framework build</td>
+          <td class="mono muted">—</td>
+          <td class="mono" style="color:var(--ai)">50–80</td>
+          <td class="mono" style="color:var(--auto)">50–80</td>
+          <td class="muted" style="font-size:11px">previously uncosted — now included</td>
+        </tr>
+        <tr>
+          <td>Writing up</td>
+          <td class="mono muted">80–100</td>
+          <td class="mono" style="color:var(--ai)">55–70</td>
+          <td class="mono" style="color:var(--auto)">55–70</td>
+          <td class="muted" style="font-size:11px">lens produces richer methodology material</td>
+        </tr>
+        <tr class="highlight-row">
+          <td><strong>Total</strong></td>
+          <td class="mono"><strong>460–635</strong></td>
+          <td class="mono" style="color:var(--ai)"><strong>225–305</strong></td>
+          <td class="mono" style="color:var(--auto)"><strong>190–265</strong></td>
+          <td class="muted" style="font-size:11px">~58% reduction on unaided</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="font-size:12px; color:var(--text-muted); line-height:1.7; margin-top:12px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border);">
+      <strong style="color:var(--text-muted); font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; display:block; margin-bottom:6px;">Context</strong>
+      A 12-month part-time masters dissertation typically demands 600–900 total hours across all components. The 190–265 hrs above covers analysis and write-up only. Add literature review (60–80 hrs), ethics and governance (20–30 hrs), participant recruitment and management (20–30 hrs), and supervision preparation (10–15 hrs). Revised total: approximately <strong style="color:var(--text)">300–420 hrs</strong> — comfortably within the expected range for a part-time masters at the upper end of ambition.
+    </div>
+  </div>
+
+  <div class="doc-footer">
+    <span>Agentic Workflow Design · MScPsychotherapy Research</span>
+    <span>IPA + PDA · Two-Pass · Lens-Informed · Local LLM Pipeline</span>
+  </div>
+
+</div>
+</body>
+</html>

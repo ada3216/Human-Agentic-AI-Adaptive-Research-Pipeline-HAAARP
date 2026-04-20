@@ -1,0 +1,16 @@
+{
+  "name": "magentica-2",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "build:gates": "tsc --project .opencode/plugins/tsconfig.json"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server-memory": "2026.1.26"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "eslint": "^8.56.0"
+  }
+}

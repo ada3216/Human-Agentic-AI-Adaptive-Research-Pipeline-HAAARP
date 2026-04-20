@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Researcher Lens Protocol</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1814;
+    --paper: #f5f0e8;
+    --warm-mid: #e8e0d0;
+    --accent: #7a4a2a;
+    --accent-light: #c4956a;
+    --muted: #8a8070;
+    --rule: #d4c8b4;
+    --pass1: #2a4a3a;
+    --pass2: #2a3a5a;
+    --lens: #5a2a4a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .page {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 60px 40px 100px;
+  }
+
+  /* Header */
+  .doc-header {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 28px;
+    margin-bottom: 48px;
+  }
+
+  .doc-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .doc-title {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 10px;
+    letter-spacing: -0.02em;
+  }
+
+  .doc-subtitle {
+    font-size: 15px;
+    font-style: italic;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .doc-meta {
+    display: flex;
+    gap: 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* Structure overview */
+  .overview-box {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 28px 32px;
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  .overview-box h2 {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    margin-bottom: 18px;
+  }
+
+  .two-pass-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .pass-pill {
+    padding: 8px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .pass-pill.p1 { background: rgba(42,74,58,0.6); border-color: #4a9a6a; }
+  .pass-pill.p2 { background: rgba(90,42,74,0.6); border-color: #9a6a9a; }
+  .pass-pill.p3 { background: rgba(42,58,90,0.6); border-color: #6a8aaa; }
+  .pass-pill.p4 { background: rgba(120,80,30,0.4); border-color: var(--accent-light); }
+
+  .arrow {
+    color: var(--muted);
+    font-size: 14px;
+    padding: 0 2px;
+  }
+
+  .overview-note {
+    margin-top: 16px;
+    font-size: 12px;
+    font-style: italic;
+    color: rgba(245,240,232,0.6);
+    line-height: 1.6;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 52px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent-light);
+    letter-spacing: 0.1em;
+    min-width: 32px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .section-tag {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1px solid;
+  }
+
+  .tag-pass1 { color: var(--pass1); border-color: var(--pass1); }
+  .tag-pass2 { color: var(--pass2); border-color: var(--pass2); }
+  .tag-lens { color: var(--lens); border-color: var(--lens); }
+  .tag-both { color: var(--accent); border-color: var(--accent); }
+
+  .section-preamble {
+    font-size: 14px;
+    font-style: italic;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 24px;
+    padding-left: 16px;
+    border-left: 3px solid var(--rule);
+  }
+
+  /* Question blocks */
+  .q-block {
+    margin-bottom: 20px;
+    padding: 20px 22px;
+    background: white;
+    border: 1px solid var(--rule);
+    position: relative;
+  }
+
+  .q-block::before {
+    content: attr(data-q);
+    position: absolute;
+    top: -1px;
+    left: 20px;
+    background: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--accent-light);
+    padding: 0 6px;
+    transform: translateY(-50%);
+  }
+
+  .q-text {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+
+  .q-prompt {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  .q-intent {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--rule);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .q-intent::before {
+    content: "↳ intent: ";
+    color: var(--muted);
+  }
+
+  /* Instruction block */
+  .instruction-block {
+    background: var(--warm-mid);
+    border: 1px solid var(--rule);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .instruction-block h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .instruction-block p {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+
+  /* Alert/note box */
+  .note-box {
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .note-box.caution {
+    background: #fff8f0;
+    border-left: 4px solid var(--accent-light);
+    color: var(--ink);
+  }
+
+  .note-box.method {
+    background: #f0f4f8;
+    border-left: 4px solid var(--pass2);
+    color: var(--ink);
+  }
+
+  .note-box strong {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* System prompt block */
+  .sys-prompt {
+    background: #0f1117;
+    color: #e0e8d8;
+    padding: 24px 26px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    margin: 20px 0;
+    position: relative;
+  }
+
+  .sys-prompt::before {
+    content: "SYSTEM PROMPT TEMPLATE";
+    display: block;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: #6a8a6a;
+    margin-bottom: 14px;
+  }
+
+  .sys-prompt .placeholder {
+    color: #9aaa6a;
+    font-style: italic;
+  }
+
+  .sys-prompt .keyword {
+    color: #6aaaaa;
+  }
+
+  /* Divider */
+  .divider {
+    text-align: center;
+    margin: 48px 0;
+    color: var(--rule);
+    font-size: 18px;
+    letter-spacing: 0.5em;
+  }
+
+  /* Two col */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .col-box {
+    padding: 18px 20px;
+    border: 1px solid var(--rule);
+  }
+
+  .col-box h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .col-box ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .col-box ul li {
+    font-size: 12.5px;
+    line-height: 1.6;
+    padding: 3px 0;
+    padding-left: 14px;
+    position: relative;
+    color: var(--ink);
+  }
+
+  .col-box ul li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  .col-box.good h4 { color: var(--pass1); }
+  .col-box.risk h4 { color: #8a2a2a; }
+
+  /* Footer */
+  .doc-footer {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  @media print {
+    body { background: white; }
+    .page { padding: 20px; }
+  }
+
+  @media (max-width: 600px) {
+    .page { padding: 32px 20px 60px; }
+    .two-col { grid-template-columns: 1fr; }
+    .two-pass-flow { gap: 6px; }
+    .doc-meta { flex-direction: column; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="doc-header">
+    <div class="doc-label">Research Methodology Document · Psychotherapy Research · MScPsychotherapy</div>
+    <h1 class="doc-title">Researcher Lens Protocol</h1>
+    <div class="doc-subtitle">Structured reflexivity dialogue for human–AI collaborative qualitative analysis</div>
+    <div class="doc-meta">
+      <span>Version: Option B — Two-Pass Design</span>
+      <span>Strands: IPA + Psychodynamic Discourse Analysis</span>
+      <span>Epistemology: Constructivist–Interpretivist</span>
+    </div>
+  </div>
+
+  <!-- Overview -->
+  <div class="overview-box">
+    <h2>Two-Pass Analysis Flow</h2>
+    <div class="two-pass-flow">
+      <div class="pass-pill p1">Pass 1 — Blind<br><small style="opacity:0.7">AI reads all data<br>no researcher lens</small></div>
+      <span class="arrow">→</span>
+      <div class="pass-pill p2">Lens Conversation<br><small style="opacity:0.7">structured reflexivity<br>dialogue with AI</small></div>
+      <span class="arrow">→</span>
+      <div class="pass-pill p3">Pass 2 — Positioned<br><small style="opacity:0.7">AI re-analyses through<br>researcher lens</small></div>
+      <span class="arrow">→</span>
+      <div class="pass-pill p4">Human Synthesis<br><small style="opacity:0.7">interpretive top layer<br>+ triangulation</small></div>
+    </div>
+    <div class="overview-note">
+      The lens conversation occurs between Pass 1 and Pass 2. It externalises the researcher's positionality into an explicit, documented interpretive frame — transforming a potential source of bias into a methodologically accounted instrument. The gap between Pass 1 and Pass 2 outputs is itself analytically generative.
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Before the Lens Conversation — Setup</h2>
+      <span class="section-tag tag-both">both strands</span>
+    </div>
+
+    <p class="section-preamble">Complete Pass 1 before any part of this protocol. The AI should have read and produced first-pass annotations across all interview transcripts (IPA strand) and all session transcripts (PDA strand) without any researcher framing. Only then begin this conversation.</p>
+
+    <div class="instruction-block">
+      <h4>Instruction to AI — opening the lens conversation</h4>
+      <p>Tell the AI: <em>"You have now read all the data. I want to have a structured conversation about my own perspective, theoretical background, and assumptions before we do a second interpretive pass. I will answer a series of questions. Your job is to listen, ask follow-up questions where something is unclear, and then summarise back to me a 'researcher lens document' that we will use to frame the second analysis. Do not begin any analysis yet."</em></p>
+    </div>
+
+    <div class="note-box method">
+      <strong>Methodological note</strong>
+      Having the AI summarise back what it heard before Pass 2 begins creates a written audit trail. This becomes part of your reflexivity appendix and demonstrates rigour in your methodology chapter.
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Theoretical & Clinical Positioning</h2>
+      <span class="section-tag tag-both">both strands</span>
+    </div>
+
+    <p class="section-preamble">These questions establish your theoretical home — the conceptual language through which you naturally make sense of therapeutic encounters. This becomes the vocabulary the AI will use when framing interpretive observations in Pass 2.</p>
+
+    <div class="q-block" data-q="Q 2.1">
+      <div class="q-text">How would you describe the integrative model the therapist is using, in your own words?</div>
+      <div class="q-prompt">What are the core theoretical traditions being drawn on? How do they sit together in this therapist's practice? What does 'integrative' mean here specifically — is it theoretically integrative, technically eclectic, or something else?</div>
+      <div class="q-intent">establishes the primary theoretical lens for reading session transcripts in the PDA strand</div>
+    </div>
+
+    <div class="q-block" data-q="Q 2.2">
+      <div class="q-text">What relational or psychodynamic concepts feel most alive and relevant to this research for you?</div>
+      <div class="q-prompt">For example: transference, countertransference, attachment, rupture and repair, the therapeutic alliance, projective identification, intersubjectivity. Which of these do you expect to appear, and in what form?</div>
+      <div class="q-intent">identifies the psychodynamic vocabulary to be sensitive to in both strands</div>
+    </div>
+
+    <div class="q-block" data-q="Q 2.3">
+      <div class="q-text">What does 'existential experience' mean to you in the context of therapy?</div>
+      <div class="q-prompt">Are you thinking about this in terms of meaning-making, mortality salience, isolation, freedom, identity — or something else? How do you expect it to show up in either what participants say in interview, or what happens in the sessions?</div>
+      <div class="q-intent">anchors the existential dimension of the research question so the AI can flag relevant material</div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Researcher Positionality & Reflexivity</h2>
+      <span class="section-tag tag-lens">core lens</span>
+    </div>
+
+    <p class="section-preamble">This is the heart of the lens conversation. In constructivist qualitative research, the researcher is not a neutral instrument. These questions make your positionality explicit so it can be held consciously rather than operating as invisible background noise.</p>
+
+    <div class="q-block" data-q="Q 3.1">
+      <div class="q-text">What is your relationship to this topic — personally, clinically, or professionally?</div>
+      <div class="q-prompt">How did you come to this research question? What draws you to it? Is there anything in your own clinical or personal experience that connects to what you are studying?</div>
+      <div class="q-intent">surfaces the researcher's emotional and experiential investment in the topic</div>
+    </div>
+
+    <div class="q-block" data-q="Q 3.2">
+      <div class="q-text">Do you hold any particular assumptions about what it is like to work with a therapist who is perceived as 'different'?</div>
+      <div class="q-prompt">What do you think clients might feel? What challenges or opportunities do you expect this creates in the therapeutic relationship? Try to be as honest as possible — these are not wrong answers, they are data about your lens.</div>
+      <div class="q-intent">makes implicit hypotheses explicit so the AI can both work with them and flag material that challenges them</div>
+    </div>
+
+    <div class="q-block" data-q="Q 3.3">
+      <div class="q-text">What would it mean for this research if participants reported largely positive experiences? What if they reported largely difficult ones?</div>
+      <div class="q-prompt">Would either outcome surprise you? What do you find yourself hoping for, if anything? What would feel uncomfortable or challenging to find?</div>
+      <div class="q-intent">reveals the researcher's stake in the findings — important for disconfirmation instruction in Pass 2</div>
+    </div>
+
+    <div class="q-block" data-q="Q 3.4">
+      <div class="q-text">Is there anything about your own identity, background, or experience that positions you in a particular way in relation to this research?</div>
+      <div class="q-prompt">You do not need to disclose anything you are not comfortable with. But anything you are willing to name helps the AI understand the lens through which you are approaching interpretation.</div>
+      <div class="q-intent">researcher discretion applies — share only what you are comfortable documenting in a methodology appendix</div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title">Hypothesis Mapping — What You Expect to Find</h2>
+      <span class="section-tag tag-lens">core lens</span>
+    </div>
+
+    <p class="section-preamble">Making your expectations explicit before Pass 2 enables the AI to both orient toward them and actively monitor for material that resists them. This is not an invitation to confirm — it is an invitation to test.</p>
+
+    <div class="q-block" data-q="Q 4.1">
+      <div class="q-text">If you had to guess: what do you think the IPA interviews will reveal about how participants experienced working with this therapist?</div>
+      <div class="q-prompt">What themes do you expect to emerge — in terms of the lived experience of the therapeutic relationship, the existential dimensions, the relational dynamics they describe?</div>
+      <div class="q-intent">generates candidate IPA themes to test against the data in Pass 2</div>
+    </div>
+
+    <div class="q-block" data-q="Q 4.2">
+      <div class="q-text">What do you expect to see in the session transcripts at the discursive level?</div>
+      <div class="q-prompt">Where do you anticipate moments of relational intensity — rupture, repair, avoidance, displacement? What linguistic or interactional features do you expect to carry psychodynamic weight in these transcripts?</div>
+      <div class="q-intent">generates candidate PDA foci for Pass 2 — moments to look for and around</div>
+    </div>
+
+    <div class="q-block" data-q="Q 4.3">
+      <div class="q-text">What do you think you might have already noticed in Pass 1 that surprised you?</div>
+      <div class="q-prompt">Having seen the first-pass AI output — was there anything that felt unexpected, that didn't fit your expectations, that seemed interesting or strange? What in the data is pulling at you?</div>
+      <div class="q-intent">integrates what the blind pass surfaced into the lens before Pass 2 — keeps the researcher genuinely responsive to the data</div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 class="section-title">Disconfirmation Instructions</h2>
+      <span class="section-tag tag-pass2">pass 2 framing</span>
+    </div>
+
+    <p class="section-preamble">This section is given to the AI as an explicit instruction before Pass 2 begins. It is the methodological guard against over-fitting to the researcher lens.</p>
+
+    <div class="instruction-block">
+      <h4>Instruction to AI — to be given before Pass 2</h4>
+      <p>Tell the AI: <em>"You now have my researcher lens. When you do the second pass, I want you to do two things simultaneously: first, read the data through this lens and flag material that is illuminated by it. Second, and equally importantly, actively look for material that does not fit — moments that resist the lens, that sit outside my expectations, that complicate or contradict what I told you I expected to find. Mark these clearly. The gap between what the lens predicts and what the data actually does is where the most important findings may live."</em></p>
+    </div>
+
+    <div class="two-col">
+      <div class="col-box good">
+        <h4>AI should surface</h4>
+        <ul>
+          <li>Material that fits the lens — with confidence rating</li>
+          <li>Material that partially fits — with note on what diverges</li>
+          <li>Material that actively resists the lens</li>
+          <li>Patterns not anticipated in the lens conversation</li>
+          <li>Moments where the two strands diverge (what participant said vs what happened in session)</li>
+        </ul>
+      </div>
+      <div class="col-box risk">
+        <h4>Guard against</h4>
+        <ul>
+          <li>Only surfacing confirming material</li>
+          <li>Reframing disconfirming data to fit the lens</li>
+          <li>Treating the lens as a coding scheme rather than an interpretive frame</li>
+          <li>Flattening ambiguity in the data to resolve it</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2 class="section-title">Lens Summary — AI Output Template</h2>
+      <span class="section-tag tag-lens">audit trail</span>
+    </div>
+
+    <p class="section-preamble">After the lens conversation, ask the AI to produce this document before Pass 2 begins. This becomes your reflexivity appendix.</p>
+
+    <div class="sys-prompt">
+<span class="keyword">Based on our conversation, please produce a Researcher Lens Summary with the following sections:</span>
+
+1. <span class="keyword">Theoretical framework</span>
+   <span class="placeholder">[AI summarises the integrative model and psychodynamic concepts named]</span>
+
+2. <span class="keyword">Researcher positionality</span>
+   <span class="placeholder">[AI summarises stated personal/clinical relationship to the topic]</span>
+
+3. <span class="keyword">Explicit hypotheses going into Pass 2</span>
+   <span class="placeholder">[IPA strand: expected themes / PDA strand: expected discursive features]</span>
+
+4. <span class="keyword">Concepts to be sensitive to</span>
+   <span class="placeholder">[vocabulary, constructs, relational dynamics named by researcher]</span>
+
+5. <span class="keyword">Disconfirmation mandate</span>
+   <span class="placeholder">[restate the explicit instruction to flag non-fitting material]</span>
+
+6. <span class="keyword">Anything the researcher flagged from Pass 1 as surprising</span>
+   <span class="placeholder">[integrating blind-pass observations into the lens]</span>
+
+<span class="keyword">Confirm back to me if this accurately represents your understanding before we proceed to Pass 2.</span>
+    </div>
+
+    <div class="note-box caution">
+      <strong>Documentation note</strong>
+      Save this lens summary document. It forms part of your methodology audit trail and should be referenced in your reflexivity section. It demonstrates that AI use in the analysis was structured, transparent, and epistemologically grounded — not a black box.
+    </div>
+  </div>
+
+  <div class="divider">· · ·</div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2 class="section-title">Methodological Framing for Write-Up</h2>
+      <span class="section-tag tag-both">methodology chapter</span>
+    </div>
+
+    <p class="section-preamble">How to describe this process in your methodology chapter — language you can adapt.</p>
+
+    <div class="instruction-block">
+      <h4>Suggested framing</h4>
+      <p><em>"A structured reflexivity protocol was employed between the first and second AI-assisted analytic passes. Following an initial blind pass of all data — in which no researcher framing was provided to the model — the researcher engaged in a structured dialogue with the AI system to articulate their theoretical commitments, clinical positionality, and a priori hypotheses. The AI produced a researcher lens summary which was confirmed prior to the second pass. This process externalised the reflexivity practice required by constructivist IPA methodology, creating a documented audit trail of the researcher's interpretive position. The AI was explicitly instructed to surface disconfirming material alongside lens-consistent findings, and the gap between blind and positioned passes was treated as analytically generative."</em></p>
+    </div>
+  </div>
+
+  <div class="doc-footer">
+    <span>Researcher Lens Protocol · MScPsychotherapy Research Design</span>
+    <span>Option B — Two-Pass Human–AI Collaborative Analysis</span>
+  </div>
+
+</div>
+</body>
+</html>

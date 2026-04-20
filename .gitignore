@@ -1,30 +1,24 @@
-# Secrets — never committed
-config/secrets.yaml
-*.env
-.env.*
+# Runtime — regenerated each session
+.ai-layer/retry-counts.json
+scripts/lint-check.sh
 
-# Raw participant data — never committed
-artifacts/raw_archive/
-*_participant_code_map.json
-*_code_map.json
+# Secrets
+.ai-layer/.vault
+.ai-layer/.vault.salt
+.env
 
-# HTML source files and Word docs (source originals — not needed in repo)
-html-archive/
-*.docx
+# Session artefacts
+.ai-layer/session-toollog.md
+
+# Node
+node_modules/
 
 # Python
 __pycache__/
 *.pyc
 *.pyo
-.pytest_cache/
-*.egg-info/
-dist/
-build/
 
-# Jupyter
-.ipynb_checkpoints/
-
-# OS
-.DS_Store
-Thumbs.db
-*:Zone.Identifier
+# Reports
+reports/
+opencode-switcher/
+opencode-switcher/

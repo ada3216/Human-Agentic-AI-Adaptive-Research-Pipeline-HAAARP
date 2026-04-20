@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generic Pipeline Toolkit — Artifacts</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --surface2: #1c2128; --surface3: #21262d;
+    --border: #30363d; --border-bright: #484f58;
+    --text: #e6edf3; --muted: #7d8590; --dim: #4d5566;
+    --blue: #58a6ff; --green: #3fb950; --purple: #d2a8ff;
+    --orange: #ffa657; --red: #ff7b72; --yellow: #e3b341; --teal: #39d353;
+    --tb: rgba(88,166,255,0.1); --tg: rgba(63,185,80,0.1);
+    --tp: rgba(210,168,255,0.1); --to: rgba(255,166,87,0.1);
+    --ty: rgba(227,179,65,0.1); --tr: rgba(255,123,114,0.1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .page { max-width: 940px; margin: 0 auto; padding: 56px 36px 100px; }
+
+  .hdr { border-bottom: 1px solid var(--border); padding-bottom: 32px; margin-bottom: 44px; }
+  .lbl { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  h1.title { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .sub { font-size: 14px; color: var(--muted); font-weight: 300; margin-bottom: 20px; line-height: 1.6; }
+  .vb { display: inline-block; background: var(--teal); color: #0d1117; font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: 2px; margin-left: 8px; vertical-align: middle; font-weight: 600; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 3px 10px; border-radius: 2px; border: 1px solid; }
+  .tag.b { color: var(--blue); border-color: var(--blue); background: var(--tb); }
+  .tag.g { color: var(--green); border-color: var(--green); background: var(--tg); }
+  .tag.p { color: var(--purple); border-color: var(--purple); background: var(--tp); }
+  .tag.o { color: var(--orange); border-color: var(--orange); background: var(--to); }
+  .tag.y { color: var(--yellow); border-color: var(--yellow); background: var(--ty); }
+
+  /* Artifact block */
+  .artifact { margin-bottom: 56px; }
+  .art-hdr { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .art-num { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid; flex-shrink: 0; }
+  .art-title { font-size: 18px; font-weight: 600; flex: 1; }
+  .art-tag { font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 3px 9px; border: 1px solid; letter-spacing: 0.1em; text-transform: uppercase; }
+  .art-desc { font-size: 13px; color: var(--muted); font-style: italic; line-height: 1.7; margin-bottom: 20px; padding-left: 50px; }
+
+  /* Code blocks */
+  .cblock { background: #0f1117; color: #e0e8d8; padding: 22px 26px; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; line-height: 1.9; margin: 14px 0; border: 1px solid var(--border); }
+  .cblock::before { content: attr(data-l); display: block; font-size: 9px; letter-spacing: 0.2em; color: #5a7a5a; margin-bottom: 14px; text-transform: uppercase; }
+  .ck { color: #6aaaaa; } .cv { color: #9aaa6a; } .cc { color: #4a5a4a; font-style: italic; }
+  .cs { color: #c8a870; } .cb { color: #d2a8ff; }
+
+  /* Q cards for lens dialogue */
+  .q-section { margin-bottom: 20px; }
+  .q-section-hdr { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; padding: 8px 14px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+  .q-list { display: flex; flex-direction: column; gap: 8px; padding-left: 50px; }
+  .q-item { background: var(--surface); border: 1px solid var(--border); padding: 12px 16px; }
+  .q-item.memo { border-left: 3px solid var(--purple); }
+  .q-item.free { border-left: 3px solid var(--blue); }
+  .q-item.pick { border-left: 3px solid var(--green); }
+  .q-item.yn { border-left: 3px solid var(--yellow); }
+  .q-id { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--muted); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .q-type { font-family: 'IBM Plex Mono', monospace; font-size: 8px; padding: 1px 5px; border-radius: 2px; }
+  .q-type.memo { background: var(--tp); color: var(--purple); border: 1px solid rgba(210,168,255,0.3); }
+  .q-type.free { background: var(--tb); color: var(--blue); border: 1px solid rgba(88,166,255,0.3); }
+  .q-type.pick { background: var(--tg); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+  .q-type.yn { background: var(--ty); color: var(--yellow); border: 1px solid rgba(227,179,65,0.3); }
+  .q-text { font-size: 13.5px; font-weight: 600; margin-bottom: 5px; line-height: 1.3; }
+  .q-note { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .q-opt { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 5px; }
+
+  /* DPIA table */
+  .dpia-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 16px 0; }
+  .dpia-table th { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; }
+  .dpia-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.55; }
+  .dpia-table tr:last-child td { border-bottom: none; }
+  .sens-badge { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 3px 8px; border-radius: 2px; border: 1px solid; display: inline-block; white-space: nowrap; }
+  .sens-badge.low { color: var(--green); border-color: rgba(63,185,80,0.4); background: var(--tg); }
+  .sens-badge.med { color: var(--yellow); border-color: rgba(227,179,65,0.4); background: var(--ty); }
+  .sens-badge.high { color: var(--red); border-color: rgba(255,123,114,0.4); background: var(--tr); }
+  .req-item { font-size: 11.5px; color: var(--muted); padding: 2px 0; }
+  .req-item::before { content: "→ "; color: var(--dim); }
+  .block-badge { font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 2px 6px; background: var(--tr); color: var(--red); border: 1px solid rgba(255,123,114,0.3); border-radius: 2px; }
+  .pass-badge { font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 2px 6px; background: var(--tg); color: var(--green); border: 1px solid rgba(63,185,80,0.3); border-radius: 2px; }
+
+  /* Alert */
+  .alert { padding: 14px 18px; border: 1px solid; margin: 12px 0; font-size: 12.5px; line-height: 1.6; }
+  .alert.info { border-color: rgba(88,166,255,0.3); background: var(--tb); color: var(--muted); }
+  .alert.warn { border-color: rgba(227,179,65,0.3); background: var(--ty); color: var(--muted); }
+  .alert.ok { border-color: rgba(63,185,80,0.3); background: var(--tg); color: var(--muted); }
+  .alert strong { font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+  .alert.info strong { color: var(--blue); }
+  .alert.warn strong { color: var(--yellow); }
+  .alert.ok strong { color: var(--green); }
+
+  .divider { height: 1px; background: linear-gradient(to right, var(--border), transparent); margin: 50px 0; }
+  .footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--dim); }
+
+  @media (max-width: 640px) {
+    .page { padding: 32px 16px 60px; }
+    .q-list, .art-desc { padding-left: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hdr">
+    <div class="lbl">Generic Research Workflow System · Drop-in Artifacts <span class="vb">v1.0</span></div>
+    <h1 class="title">Generic Pipeline Toolkit</h1>
+    <div class="sub">Four ready-to-use artifacts that can be dropped into any implementation of the generic agentic research pipeline. Artifact 1 is the lens dialogue module. Artifact 2 is the DPIA sensitivity classification table. Artifact 3 is the Human Evidence Review JSON schema. Artifact 4 is the study config JSON template showing how all four link together.</div>
+    <div class="tags">
+      <span class="tag p">Artifact 1 — Lens Dialogue</span>
+      <span class="tag y">Artifact 2 — DPIA Table</span>
+      <span class="tag o">Artifact 3 — Evidence Review JSON</span>
+      <span class="tag b">Artifact 4 — Study Config</span>
+    </div>
+  </div>
+
+  <!-- ARTIFACT 1 — LENS DIALOGUE -->
+  <div class="artifact">
+    <div class="art-hdr">
+      <div class="art-num" style="color:var(--purple);border-color:var(--purple)">A1</div>
+      <h2 class="art-title">Structured Lens Dialogue Module</h2>
+      <span class="art-tag" style="color:var(--purple);border-color:var(--purple)">generative · 8–12 questions · configurable by method</span>
+    </div>
+    <div class="art-desc">The generative reflexivity elicitation that powers the lens-informed pass. Unlike a preset (which is a static label), this dialogue draws out the researcher's positionality, theoretical orientation, hypotheses, and interpretive boundaries through structured questions. Saved as lens_[run_id].json and hashed before Pass 2 begins. The full dialogue transcript is saved alongside the lens summary. Lens vocabulary named here feeds the amplification detection in the grounding verification pass. Design constraint: 8–12 questions maximum — fewer loses depth, more creates fatigue and drift. Questions are grouped into five thematic sections.</div>
+
+    <div class="alert warn">
+      <strong>Configuration by method (onboarding Q5 feeds this)</strong>
+      Questions in sections 1 and 3 adapt based on theoretical_orientation from onboarding. A phenomenological orientation receives questions about meaning-making and lived experience; a psychodynamic orientation receives questions about relational dynamics and transference concepts; a positivist/quantitative orientation receives a lighter lens (hypothesis mapping only, sections 1 and 4; positionality section is abbreviated). The question set below is the full qualitative/mixed version.
+    </div>
+
+    <!-- Section 1 -->
+    <div class="q-section">
+      <div class="q-section-hdr" style="background:rgba(210,168,255,0.06);color:var(--purple);">Section 1 — Researcher Identity & Theoretical Stance</div>
+      <div class="q-list">
+        <div class="q-item free">
+          <div class="q-id">L1.1 <span class="q-type free">free text</span></div>
+          <div class="q-text">What is your theoretical orientation — how do you naturally make sense of human experience?</div>
+          <div class="q-note">Phenomenological / psychodynamic / CBT / critical / constructivist / other — describe in your own words, not just the label. A short memo is more useful than a category name.</div>
+        </div>
+        <div class="q-item free">
+          <div class="q-id">L1.2 <span class="q-type free">free text</span></div>
+          <div class="q-text">If you have clinical or practitioner experience relevant to this study, describe your relationship to this kind of work.</div>
+          <div class="q-note">How does your practice experience shape what you notice? What does working in this area feel like from the inside?</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2 -->
+    <div class="q-section">
+      <div class="q-section-hdr" style="background:rgba(88,166,255,0.06);color:var(--blue);">Section 2 — Research Aims & Hypotheses</div>
+      <div class="q-list">
+        <div class="q-item free">
+          <div class="q-id">L2.1 <span class="q-type free">free text</span></div>
+          <div class="q-text">State your primary research question in plain language — as you would explain it to a participant.</div>
+          <div class="q-note">Then note: is this the same wording as in your pre-registration? If it has drifted, flag the difference here.</div>
+        </div>
+        <div class="q-item memo">
+          <div class="q-id">L2.2 <span class="q-type memo">memo</span></div>
+          <div class="q-text">What do you expect to find — your honest hypotheses going in?</div>
+          <div class="q-note">List 3–5 specific expectations. These will be cross-checked against your pre-registration. Any that are new or modified will be flagged in the lens summary as post-hoc and must be acknowledged.</div>
+        </div>
+        <div class="q-item memo">
+          <div class="q-id">L2.3 <span class="q-type memo">memo</span></div>
+          <div class="q-text">What concepts, constructs, or vocabulary do you want the AI to be sensitive to in the data?</div>
+          <div class="q-note">Name specific terms, theoretical constructs, relational dynamics, or linguistic features. These become the lens vocabulary — they are also used by the grounding verification pass to detect potential amplification.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3 -->
+    <div class="q-section">
+      <div class="q-section-hdr" style="background:rgba(255,166,87,0.06);color:var(--orange);">Section 3 — Participant & Context Assumptions</div>
+      <div class="q-list">
+        <div class="q-item yn">
+          <div class="q-id">L3.1 <span class="q-type yn">yes/no + memo</span></div>
+          <div class="q-text">Does your study involve vulnerable groups or power dynamics that might shape how participants present their experience?</div>
+          <div class="q-note">If yes: describe the dynamic and how it might affect what participants say or avoid saying. This shapes how the AI interprets hedging, silence, and resistance in the data.</div>
+        </div>
+        <div class="q-item memo">
+          <div class="q-id">L3.2 <span class="q-type memo">memo</span></div>
+          <div class="q-text">What do you think participants might find difficult to talk about, or might not say directly?</div>
+          <div class="q-note">Where do you expect omission, indirection, or displacement? This feeds the relational moment flagging in PDA and the interpretive layer in IPA.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4 -->
+    <div class="q-section">
+      <div class="q-section-hdr" style="background:rgba(63,185,80,0.06);color:var(--green);">Section 4 — Analytic Focus, Exclusions & Evidence Standards</div>
+      <div class="q-list">
+        <div class="q-item free">
+          <div class="q-id">L4.1 <span class="q-type free">list</span></div>
+          <div class="q-text">What will you explicitly NOT be looking for in this analysis?</div>
+          <div class="q-note">Name specific themes, constructs, or readings that are outside the scope of this study. This prevents scope creep in AI-generated outputs and keeps the analysis focused.</div>
+        </div>
+        <div class="q-item pick">
+          <div class="q-id">L4.2 <span class="q-type pick">preference</span></div>
+          <div class="q-text">What counts as adequate evidential support for a claim in this study?</div>
+          <div class="q-note">Default: ≥2 distinct excerpts from different participants to support a generalised claim. Adjust here if your study design or method requires a different standard. This threshold is passed to the grounding verification agent.</div>
+          <div class="q-opt">default → require_excerpt_count: 2 · adjust if needed</div>
+        </div>
+        <div class="q-item memo">
+          <div class="q-id">L4.3 <span class="q-type memo">memo</span></div>
+          <div class="q-text">Where is the boundary between what you will call an interpretation and what you will call a data-grounded finding?</div>
+          <div class="q-note">How confident do you need to be, and with what level of support, before moving from "the data suggests" to "the data shows"? Naming this boundary helps calibrate the grounding verification pass.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5 -->
+    <div class="q-section">
+      <div class="q-section-hdr" style="background:rgba(227,179,65,0.06);color:var(--yellow);">Section 5 — Pass 1 Surprises & Lock Confirmation</div>
+      <div class="q-list">
+        <div class="q-item memo">
+          <div class="q-id">L5.1 <span class="q-type memo">memo</span></div>
+          <div class="q-text">Having reviewed the Pass 1 blind output — what surprised you? What didn't fit your expectations?</div>
+          <div class="q-note">What does the data seem to want to say that you weren't expecting? This observation is included in the lens summary and feeds the disconfirmation mandate for Pass 2.</div>
+        </div>
+        <div class="q-item yn">
+          <div class="q-id">L5.2 <span class="q-type yn">confirmation + lock</span></div>
+          <div class="q-text">Confirm that the lens summary the AI has produced accurately represents your understanding and is ready to be locked.</div>
+          <div class="q-note">Once confirmed, the lens summary is hashed and timestamped. It cannot be modified. Any subsequent changes require a new lens version (lens_v2) with its own hash — the delta between versions is noted in the audit trail.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cblock" data-l="lens output file — saved as lens_[run_id].json and hashed before pass 2">
+<span class="ck">{</span>
+  <span class="ck">"lens_id"</span>: <span class="cv">"lens_[run_id]"</span>,
+  <span class="ck">"version"</span>: <span class="cv">"v1"</span>,                          <span class="cc">// increment if lens is updated</span>
+  <span class="ck">"timestamp_utc"</span>: <span class="cv">"ISO8601"</span>,
+  <span class="ck">"researcher_id"</span>: <span class="cv">"orcid or username"</span>,
+  <span class="ck">"prereg_doi"</span>: <span class="cv">"10.17605/OSF.IO/xxxxx"</span>,
+  <span class="ck">"dialogue_transcript_path"</span>: <span class="cv">"lens_dialogue_[run_id].txt"</span>,
+  <span class="ck">"theoretical_orientation"</span>: <span class="cv">"researcher's own words"</span>,
+  <span class="ck">"clinical_orientation"</span>: <span class="cv">"if applicable"</span>,
+  <span class="ck">"primary_hypotheses"</span>: <span class="ck">[</span>
+    <span class="ck">{</span> <span class="ck">"hypothesis"</span>: <span class="cv">"string"</span>, <span class="ck">"in_prereg"</span>: <span class="cv">true</span> <span class="ck">}</span>    <span class="cc">// false = post-hoc, flagged</span>
+  <span class="ck">]</span>,
+  <span class="ck">"lens_vocabulary"</span>: <span class="ck">[</span><span class="cv">"list of named constructs"</span><span class="ck">]</span>,    <span class="cc">// used in amplification detection</span>
+  <span class="ck">"explicit_exclusions"</span>: <span class="ck">[</span><span class="cv">"what researcher will not look for"</span><span class="ck">]</span>,
+  <span class="ck">"evidence_standard"</span>: <span class="ck">{</span>
+    <span class="ck">"require_excerpt_count"</span>: <span class="cv">2</span>,
+    <span class="ck">"generalisation_threshold"</span>: <span class="cv">"≥2 distinct participants"</span>
+  <span class="ck">}</span>,
+  <span class="ck">"pass1_surprises"</span>: <span class="cv">"researcher's memo on unexpected blind-pass findings"</span>,
+  <span class="ck">"posthoc_hypothesis_flags"</span>: <span class="ck">[</span><span class="cv">"any hypothesis not in prereg"</span><span class="ck">]</span>,
+  <span class="ck">"lens_summary_hash"</span>: <span class="cv">"sha256"</span>,                  <span class="cc">// hash of this file</span>
+  <span class="ck">"researcher_confirmation"</span>: <span class="cv">true</span>,               <span class="cc">// must be true before pass 2</span>
+  <span class="ck">"locked"</span>: <span class="cv">true</span>                                 <span class="cc">// set by pipeline after confirmation</span>
+<span class="ck">}</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ARTIFACT 2 — DPIA TABLE -->
+  <div class="artifact">
+    <div class="art-hdr">
+      <div class="art-num" style="color:var(--yellow);border-color:var(--yellow)">A2</div>
+      <h2 class="art-title">DPIA Sensitivity Classification Table</h2>
+      <span class="art-tag" style="color:var(--yellow);border-color:var(--yellow)">pipeline enforcement logic</span>
+    </div>
+    <div class="art-desc">Maps data type and modality to required governance actions. The pipeline reads the sensitivity field from study config and enforces the requirements at this table. Special category data triggers a hard block on ingestion until DPIA is complete. This table applies UK/GDPR jurisdiction — adapt the specific regulatory references for other jurisdictions.</div>
+
+    <table class="dpia-table">
+      <thead>
+        <tr>
+          <th>Sensitivity Level</th>
+          <th>Example data types</th>
+          <th>Pipeline action</th>
+          <th>Required governance steps</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="sens-badge low">public_text</span></td>
+          <td style="color:var(--muted);">Published blog posts, public social media, public documents, published academic text</td>
+          <td><span class="pass-badge">proceed</span></td>
+          <td>
+            <div class="req-item">Standard academic citation practice</div>
+            <div class="req-item">Minimal de-identification (remove usernames if pseudonymous)</div>
+            <div class="req-item">Note data source in methodology</div>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="sens-badge med">personal_non_sensitive</span></td>
+          <td style="color:var(--muted);">Identifiable interview data (non-health), survey responses with demographic identifiers, professional correspondence</td>
+          <td><span class="pass-badge">proceed with warning</span></td>
+          <td>
+            <div class="req-item">Pseudonymisation required before AI processing</div>
+            <div class="req-item">Access log — document who can access raw data</div>
+            <div class="req-item">Retention policy — define and document</div>
+            <div class="req-item">Participant consent covering data use</div>
+            <div class="req-item">DPIA recommended but not mandatory</div>
+            <div class="req-item">Ethics committee notification</div>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="sens-badge high">special_category</span></td>
+          <td style="color:var(--muted);">Health data, therapy session recordings/transcripts, mental health information, sexual orientation, criminal convictions, biometric data, data on minors</td>
+          <td><span class="block-badge">HARD BLOCK — ingestion blocked until DPIA complete</span></td>
+          <td>
+            <div class="req-item">DPIA mandatory — submit to institutional DPO before any data collection</div>
+            <div class="req-item">GDPR Article 9 lawful basis confirmed (explicit consent for research: Art. 9(2)(a))</div>
+            <div class="req-item">Ethics committee approval required — include data-flow diagram</div>
+            <div class="req-item">Enhanced pseudonymisation — names, locations, dates, all identifying details replaced before AI sees any data</div>
+            <div class="req-item">AI processing explicitly named in consent form with local-only execution statement</div>
+            <div class="req-item">Storage encryption on all devices holding original data</div>
+            <div class="req-item">Access controls documented — named individuals only</div>
+            <div class="req-item">Retention limit defined per data type (recordings / transcripts / AI outputs / audit files)</div>
+            <div class="req-item">Breach protocol documented — notification chain and timeframe</div>
+            <div class="req-item">Participant right to withdraw post-transcription defined</div>
+            <div class="req-item">BPS Code of Ethics and Conduct (2021) compliance statement</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="alert warn">
+      <strong>Pipeline enforcement</strong>
+      The sensitivity field in study config (from onboarding Q4) triggers this logic. If sensitivity == "special_category": require_dpia = true, block_ingestion_until_dpia_complete = true. The pipeline reads a dpia_complete boolean and a dpia_document_path from study config before proceeding past Stage −1. These fields must be set manually by the researcher after DPIA approval — there is no automated bypass.
+    </div>
+
+    <div class="alert info">
+      <strong>Jurisdiction note</strong>
+      This table is written for UK research (GDPR as retained in UK law, BPS ethics framework, university ethics committees). For EU research: same GDPR provisions apply. For US research: replace BPS with APA ethics guidelines; replace GDPR with IRB approval process (45 CFR 46) and relevant state privacy law. For clinical research: additional regulatory layers (e.g., NHS R&D approval in UK) may apply — check with institutional research governance office.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ARTIFACT 3 — EVIDENCE REVIEW JSON -->
+  <div class="artifact">
+    <div class="art-hdr">
+      <div class="art-num" style="color:var(--orange);border-color:var(--orange)">A3</div>
+      <h2 class="art-title">Human Evidence Review JSON Schema</h2>
+      <span class="art-tag" style="color:var(--orange);border-color:var(--orange)">completable record · one file per claim</span>
+    </div>
+    <div class="art-desc">Produced by the grounding verification agent with human_verdict: null. The researcher completes the human_verdict object for every flagged claim. The completed file becomes part of the audit bundle. Synthesis is blocked until all verdicts are filled. For team workflows, the adjudicator fields are activated when verdicts disagree. For solo researchers, adjudicator fields remain null and are noted as not applicable.</div>
+
+    <div class="cblock" data-l="evidence_review_[claim_id].json — produced by grounding agent, completed by researcher">
+<span class="ck">{</span>
+  <span class="ck">"claim_id"</span>: <span class="cv">"C12"</span>,                          <span class="cc">// unique per claim, per run</span>
+  <span class="ck">"run_id"</span>: <span class="cv">"pass2_[timestamp]"</span>,              <span class="cc">// links to audit metadata</span>
+  <span class="ck">"strand"</span>: <span class="cv">"IPA | PDA | TA | quant | mixed"</span>,
+  <span class="ck">"generated_by"</span>: <span class="cv">"pass2 | grounding_agent"</span>,
+  <span class="ck">"claim_text"</span>: <span class="cv">"verbatim claim from Pass 2 output"</span>,
+
+  <span class="ck">"supporting_segments"</span>: <span class="ck">[</span>
+    <span class="cv">"P01_interview_L45_49"</span>,              <span class="cc">// format: [participant]_[source]_L[start]_[end]</span>
+    <span class="cv">"P03_session2_L12_18"</span>
+  <span class="ck">]</span>,
+  <span class="ck">"support_count"</span>: <span class="cv">2</span>,
+  <span class="ck">"support_strength"</span>: <span class="cv">"strong | moderate | weak | none"</span>,
+                                              <span class="cc">// strong ≥3 | moderate 2 | weak 1 | none 0</span>
+
+  <span class="ck">"verification_flags"</span>: <span class="ck">[</span>
+    <span class="cv">"low_evidence_count"</span>,               <span class="cc">// below configured require_excerpt_count</span>
+    <span class="cv">"lens_vocabulary_only"</span>,              <span class="cc">// excerpts only use researcher's lens terms</span>
+    <span class="cv">"overgeneralisation"</span>,               <span class="cc">// broad claim, single excerpt source</span>
+    <span class="cv">"excerpt_not_found"</span>,                <span class="cc">// citation drift — possible hallucination</span>
+    <span class="cv">"excerpt_does_not_support"</span>,         <span class="cc">// excerpt exists but claim is overstated</span>
+    <span class="cv">"single_participant_only"</span>           <span class="cc">// claim generalises beyond one participant</span>
+  <span class="ck">]</span>,
+
+  <span class="ck">"human_verdict"</span>: <span class="ck">{</span>
+    <span class="ck">"verdict"</span>: <span class="cv">null</span>,                    <span class="cc">// researcher fills: accept | accept_with_revision | reject | recheck</span>
+    <span class="ck">"reviewer_id"</span>: <span class="cv">null</span>,               <span class="cc">// orcid or username</span>
+    <span class="ck">"timestamp_utc"</span>: <span class="cv">null</span>,             <span class="cc">// ISO8601 — auto-filled on save</span>
+    <span class="ck">"revised_claim_text"</span>: <span class="cv">null</span>,        <span class="cc">// required if accept_with_revision</span>
+    <span class="ck">"notes"</span>: <span class="cv">null</span>,                     <span class="cc">// required if accept_with_revision or reject</span>
+    <span class="ck">"interpretive_proposition"</span>: <span class="cv">false</span>  <span class="cc">// set true if accepted despite weak/none support</span>
+                                              <span class="cc">// claims marked true are labelled in write-up</span>
+  <span class="ck">}</span>,
+
+  <span class="ck">"adjudication"</span>: <span class="ck">{</span>                      <span class="cc">// team workflows only; null for solo researchers</span>
+    <span class="ck">"required"</span>: <span class="cv">false</span>,                  <span class="cc">// set true if coder verdicts disagree</span>
+    <span class="ck">"adjudicator_id"</span>: <span class="cv">null</span>,
+    <span class="ck">"adjudication_timestamp_utc"</span>: <span class="cv">null</span>,
+    <span class="ck">"adjudication_notes"</span>: <span class="cv">null</span>         <span class="cc">// required if adjudication occurred</span>
+  <span class="ck">}</span>
+<span class="ck">}</span>
+    </div>
+
+    <div class="alert ok">
+      <strong>Verdict definitions</strong>
+      <strong style="display:inline;font-size:12px;letter-spacing:0;text-transform:none;font-family:'IBM Plex Sans',sans-serif;">accept</strong> — claim is well-grounded; no modification needed.<br>
+      <strong style="display:inline;font-size:12px;letter-spacing:0;text-transform:none;font-family:'IBM Plex Sans',sans-serif;">accept_with_revision</strong> — claim is defensible but overstated; revised_claim_text required; notes required.<br>
+      <strong style="display:inline;font-size:12px;letter-spacing:0;text-transform:none;font-family:'IBM Plex Sans',sans-serif;">reject</strong> — claim is unsupported or hallucinated; removed from analysis; notes required explaining why.<br>
+      <strong style="display:inline;font-size:12px;letter-spacing:0;text-transform:none;font-family:'IBM Plex Sans',sans-serif;">recheck</strong> — transcript needs re-examination before verdict; pipeline pauses this claim until resolved.<br><br>
+      Claims accepted despite weak or none support must have interpretive_proposition set to true — these are labelled as interpretive propositions rather than data-grounded findings in the write-up. The proportion of claims in each verdict category is reported in the methodology appendix.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ARTIFACT 4 — STUDY CONFIG -->
+  <div class="artifact">
+    <div class="art-hdr">
+      <div class="art-num" style="color:var(--blue);border-color:var(--blue)">A4</div>
+      <h2 class="art-title">Study Config JSON Template</h2>
+      <span class="art-tag" style="color:var(--blue);border-color:var(--blue)">produced by onboarding · drives entire pipeline</span>
+    </div>
+    <div class="art-desc">Generated by the onboarding wizard from researcher answers. Drives all pipeline decisions — module activation, quality criteria routing, DPIA enforcement, pass constraints, and output configuration. This file should be stored alongside the pre-registration and included in the audit bundle. The bespoke MScPsychotherapy study is shown as a worked example in the comments.</div>
+
+    <div class="cblock" data-l="study_config.json — generated by onboarding, drives all pipeline decisions">
+<span class="ck">{</span>
+  <span class="cc">// ── STUDY IDENTITY ──────────────────────────────────────────────────────</span>
+  <span class="ck">"study_title"</span>: <span class="cv">"string"</span>,               <span class="cc">// e.g. "Client experiences of working with a therapist perceived as different"</span>
+  <span class="ck">"study_aim"</span>: <span class="cv">"one sentence"</span>,
+  <span class="ck">"pre_registration_doi"</span>: <span class="cv">"string or null"</span>,  <span class="cc">// propagates into every audit metadata file</span>
+  <span class="ck">"ethics_committee_id"</span>: <span class="cv">"string or null"</span>,
+
+  <span class="cc">// ── DATA & SENSITIVITY ──────────────────────────────────────────────────</span>
+  <span class="ck">"modalities"</span>: <span class="ck">[</span><span class="cv">"audio"</span>, <span class="cv">"text"</span>, <span class="cv">"survey_csv"</span><span class="ck">]</span>,   <span class="cc">// activates modality adapters</span>
+  <span class="ck">"sensitivity"</span>: <span class="cv">"public_text | personal_non_sensitive | special_category"</span>,
+  <span class="ck">"dpia_required"</span>: <span class="cv">true</span>,                  <span class="cc">// auto-set if sensitivity == special_category</span>
+  <span class="ck">"dpia_complete"</span>: <span class="cv">false</span>,                 <span class="cc">// researcher sets true after DPO approval</span>
+  <span class="ck">"dpia_document_path"</span>: <span class="cv">"string or null"</span>,   <span class="cc">// required if dpia_required == true</span>
+
+  <span class="cc">// ── METHOD & QUALITY CRITERIA ──────────────────────────────────────────</span>
+  <span class="ck">"method"</span>: <span class="cv">"IPA | PDA | mixed | TA | GT | discourse | quant"</span>,
+  <span class="ck">"method_strands"</span>: <span class="ck">[</span><span class="cv">"IPA"</span>, <span class="cv">"PDA"</span><span class="ck">]</span>,          <span class="cc">// for mixed designs — routes strand-specific QC</span>
+  <span class="ck">"quality_criteria"</span>: <span class="ck">{</span>
+    <span class="ck">"IPA"</span>: <span class="cv">"lincoln_guba_trustworthiness"</span>,  <span class="cc">// never inter-rater reliability</span>
+    <span class="ck">"PDA"</span>: <span class="cv">"krippendorff_alpha_with_CI"</span>,    <span class="cc">// applied to coding phase only</span>
+    <span class="ck">"quant"</span>: <span class="cv">"pvalues_CI_effect_sizes_corrections"</span>
+  <span class="ck">}</span>,
+
+  <span class="cc">// ── PIPELINE CONSTRAINTS ───────────────────────────────────────────────</span>
+  <span class="ck">"pass1_hash_required"</span>: <span class="cv">true</span>,             <span class="cc">// hardcoded true — cannot be set false</span>
+  <span class="ck">"lens_hash_required"</span>: <span class="cv">true</span>,              <span class="cc">// hardcoded true — cannot be set false</span>
+  <span class="ck">"human_verdict_gate"</span>: <span class="cv">true</span>,             <span class="cc">// hardcoded true — synthesis blocked until complete</span>
+  <span class="ck">"deidentify_before_analysis"</span>: <span class="cv">true</span>,      <span class="cc">// hardcoded true — cannot be set false</span>
+
+  <span class="cc">// ── LENS MODULE ────────────────────────────────────────────────────────</span>
+  <span class="ck">"lens_module"</span>: <span class="cv">"lens_protocol_v1"</span>,
+  <span class="ck">"lens_question_count"</span>: <span class="cv">10</span>,              <span class="cc">// 8–12 range; configured by method and orientation</span>
+  <span class="ck">"lens_hash"</span>: <span class="cv">"null until lens is locked"</span>,
+
+  <span class="cc">// ── RESEARCHER & TEAM ──────────────────────────────────────────────────</span>
+  <span class="ck">"onboarding"</span>: <span class="ck">{</span>
+    <span class="ck">"theoretical_orientation"</span>: <span class="cv">"string"</span>,  <span class="cc">// from Q5 — configures lens dialogue</span>
+    <span class="ck">"team_structure"</span>: <span class="cv">"solo | 2-person | team"</span>,  <span class="cc">// activates adjudication policy if not solo</span>
+    <span class="ck">"academic_level"</span>: <span class="cv">"masters | phd | lab"</span>
+  <span class="ck">}</span>,
+
+  <span class="cc">// ── OUTPUTS ────────────────────────────────────────────────────────────</span>
+  <span class="ck">"outputs"</span>: <span class="ck">[</span>
+    <span class="cv">"IPA_themes"</span>, <span class="cv">"PDA_codebook"</span>, <span class="cv">"claim_evidence_table"</span>,
+    <span class="cv">"evidence_review_records"</span>, <span class="cv">"methodology_scaffold"</span>, <span class="cv">"audit_bundle"</span>
+  <span class="ck">]</span>,
+
+  <span class="cc">// ── MODEL & STABILITY ──────────────────────────────────────────────────</span>
+  <span class="ck">"model_defaults"</span>: <span class="ck">{</span>
+    <span class="ck">"provider"</span>: <span class="cv">"local"</span>,
+    <span class="ck">"model_name"</span>: <span class="cv">"qwen2.5-27b-instruct"</span>,
+    <span class="ck">"deterministic_run"</span>: <span class="cv">true</span>,
+    <span class="ck">"seeds"</span>: <span class="ck">[</span><span class="cv">42</span>, <span class="cv">99</span>, <span class="cv">123</span><span class="ck">]</span>
+  <span class="ck">}</span>,
+  <span class="ck">"stability_tests"</span>: <span class="ck">{</span>
+    <span class="ck">"seeded_reruns"</span>: <span class="cv">3</span>,
+    <span class="ck">"deterministic_run"</span>: <span class="cv">true</span>,
+    <span class="ck">"alternate_model_optional"</span>: <span class="cv">true</span>      <span class="cc">// recommended at phd/lab; optional at masters</span>
+  <span class="ck">}</span>,
+
+  <span class="cc">// ── ARCHIVE ────────────────────────────────────────────────────────────</span>
+  <span class="ck">"audit_settings"</span>: <span class="ck">{</span>
+    <span class="ck">"save_to"</span>: <span class="cv">"osf | institutional_repo | local"</span>,
+    <span class="ck">"persistent_id"</span>: <span class="cv">true</span>,
+    <span class="ck">"bundle_contents"</span>: <span class="ck">[</span>
+      <span class="cv">"study_config.json"</span>, <span class="cv">"lens_[run_id].json"</span>, <span class="cv">"audit_metadata_*.json"</span>,
+      <span class="cv">"pass1_output_hash.txt"</span>, <span class="cv">"lens_delta_report.md"</span>,
+      <span class="cv">"evidence_review_*.json"</span>, <span class="cv">"stability_test_report.md"</span>
+    <span class="ck">]</span>
+  <span class="ck">}</span>
+<span class="ck">}</span>
+    </div>
+
+    <div class="alert info">
+      <strong>Hardcoded fields</strong>
+      pass1_hash_required, lens_hash_required, human_verdict_gate, and deidentify_before_analysis are always set to true by the pipeline — they cannot be overridden by the study config. If a researcher manually sets them to false, the pipeline ignores the override and logs a warning. These are the four non-negotiable sequencing constraints from the architecture specification.
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Generic Pipeline Toolkit v1.0 · Four Drop-in Artifacts</span>
+    <span>Lens Dialogue · DPIA Table · Evidence Review JSON · Study Config</span>
+  </div>
+
+</div>
+</body>
+</html>
