@@ -35,6 +35,13 @@ Success test:
    - Classify by purpose, not path name.
    - CI workflows default to IMPLEMENTATION GOVERNANCE, not FRAMEWORK.
    - If the repo itself is a framework/tooling product, those files may be PRODUCT.
+   - `scripts/` are PRODUCT only when they directly execute, preprocess, deploy,
+     or package the PRODUCT itself. Repo workflow, lint wrapper, integrity,
+     init, state, retry-budget, session, and agent scripts are FRAMEWORK or
+     IMPLEMENTATION GOVERNANCE by purpose.
+   - Empty or planned top-level directories named in README, devplan, or specs
+     still count as repo surfaces. List them and mark them as active, stubbed,
+     or empty/planned rather than omitting them.
    - `PROJECT_CONFIG.md` and `ARCHITECTURE.md` must be derived from PRODUCT and
      IMPLEMENTATION GOVERNANCE sources. Do not describe FRAMEWORK files as product
      architecture unless the repo itself is explicitly about that framework.
@@ -91,6 +98,13 @@ Success test:
      - data handling rules
      - artifact naming/integrity rules
      - dependency-change policy
+     - atomic write requirements
+     - append-only / immutability lock points
+     - reviewer identity / approval semantics
+     - reproducibility metadata requirements (model_config, prompt hash,
+       seeds, versions)
+     - filesystem safety rules (dataset_id validation, collision checks,
+       path containment, raw-archive exclusion)
    f. PRODUCT SOURCE
    - Read representative files from actual PRODUCT source directories.
    - Extract:
@@ -157,13 +171,21 @@ Success test:
    - If a value is supported only by FRAMEWORK files and not by PRODUCT or
      IMPLEMENTATION GOVERNANCE sources, do not treat it as product truth.
 7. Draft `PROJECT_CONFIG.md` in memory. Use this exact section/header structure.
+   `PROJECT_CONFIG.md` is the compact operational index. It provides identity,
+   boundaries, runtime metadata, verification commands, env requirements,
+   sensitivity classification, and a short constraint digest.
+   Do not duplicate full prohibited-integration lists, artifact convention tables,
+   or hard-gate tables in `PROJECT_CONFIG.md` when they are captured in
+   `ARCHITECTURE.md`. If a structural rule has its canonical home in
+   `ARCHITECTURE.md`, leave only a short digest or pointer in
+   `PROJECT_CONFIG.md` compensating_constraints.
 ```markdown
 ## Project Context
 - project_name: [from README/devplan/proposal/interview]
 - project_description: [one sentence describing the PRODUCT, not the AI workflow]
 - project_type: [explicit repo term if available; else infer]
 - primary_language: [dominant PRODUCT source language only]
-- governed_languages: [PRODUCT source + PRODUCT-operational script languages; exclude FRAMEWORK-only languages]
+- governed_languages: [PRODUCT source languages only; see Step 9]
 - runtime_stack: [specific runtime/execution model]
 - current_dev_phase: [phase N of M | proposal-only — implementation not started | pre-scaffold — no product source yet | N/A | unset — needs input]
 - repo_boundaries:
@@ -184,7 +206,8 @@ Success test:
 - required_verification_env: [env vars / flags | none detected]
 ## Runtime Model Behaviour
 - compensating_constraints:
-  - [one bullet per hard rule from guardrails/policy/CI]
+  - [one bullet per high-signal rule from guardrails/policy/CI]
+  - [keep short — full details are canonical in ARCHITECTURE.md]
   - [never write "none" if implementation-governance files exist]
 ## Data Sensitivity
 - data_sensitivity: [sensitive | standard]
@@ -198,18 +221,22 @@ Success test:
    - Add new fields if a significant repo property does not fit cleanly.
    - Mark unresolved items unset — update manually.
 8. Draft ARCHITECTURE.md in memory. Use these exact core headers:
-   - ## What this system does
-   - ## Who uses it and how
-   - ## Non-negotiable architectural patterns
-   - ## Non-negotiable constraints
-   - ## Why this system exists (north star)
-   - ## Data flow (sensitive data)
-   - ## Project Ethos
+   - What this system does
+   - Who uses it and how
+   - Non-negotiable architectural patterns
+   - Non-negotiable constraints
+   - Why this system exists (north star)
+   - Data flow (sensitive data)
+   - Project Ethos
    Add these sections whenever the evidence supports them:
-   - ## Key Components
-   - ## Hard gates
-   - ## Prohibited integrations
-   - ## Artifact conventions
+   - Key Components
+   - Hard gates
+   - Prohibited integrations
+   - Artifact conventions
+   ARCHITECTURE.md is the canonical home for product patterns, hard gates,
+   prohibited integrations, artifact conventions, and other reviewer-checkable
+   invariants. For scaffold repos, label key components as implemented, partial,
+   or planned when that status materially affects future implementation work.
    Hard scope rule:
    - Every sentence must help a future agent implement or modify the PRODUCT.
    - Do not describe the AI workflow around the repo as if it were the PRODUCT.
@@ -217,35 +244,35 @@ Success test:
      MCP memory, retry budget, or .ai-layer/decisions.md as product architecture
      unless the repo itself is explicitly about those things.
    Use this exact drafting shape:
-## What this system does
-- project_summary: [product summary grounded in README/spec/source/interview]
-## Who uses it and how
-- users_and_context: [actual end users/operators and interaction model]
-## Key Components
+What this system does
+- project_summary: product summary grounded in README/spec/source/interview
+Who uses it and how
+- users_and_context: actual end users/operators and interaction model
+Key Components
 - [component or stage]: [responsibility]
-- [if repo is proposal-only or bootstrap, planned components may be listed here and labelled planned]
-## Non-negotiable architectural patterns
+- if repo is proposal-only or bootstrap, planned components may be listed here and labelled planned
+Non-negotiable architectural patterns
 - patterns:
-  - [actionable implementation pattern]
-  - [actionable implementation pattern]
-## Non-negotiable constraints
+  - actionable implementation pattern
+  - actionable implementation pattern
+Non-negotiable constraints
 - constraints:
-  - [specific prohibition or required behavior]
-  - [specific prohibition or required behavior]
-## Why this system exists (north star)
-- north_star: [core purpose that must not be traded away]
-## Data flow (sensitive data)
+  - specific prohibition or required behavior
+  - specific prohibition or required behavior
+Why this system exists (north star)
+- north_star: core purpose that must not be traded away
+Data flow (sensitive data)
 - data_flow:
-  - [how data enters]
-  - [how data transforms / stores / locks / exits]
-  - [what may never leave the system, if relevant]
-## Project Ethos
-- project_ethos: [design philosophy the system clearly optimises for]
-## Hard gates
-- [gate name] | trigger: [condition] | effect: [block/warn] | recovery: [what user must do]
-## Prohibited integrations
+  - how data enters
+  - how data transforms / stores / locks / exits
+  - what may never leave the system, if relevant
+Project Ethos
+- project_ethos: design philosophy the system clearly optimises for
+Hard gates
+- gate name | trigger: condition | effect: block/warn | recovery: what user must do
+Prohibited integrations
 - [dependency/service]: [reason]
-## Artifact conventions
+Artifact conventions
 - [convention]: [detail]
    Rules:
    - patterns must be actionable.
@@ -267,8 +294,14 @@ Success test:
    - Count PRODUCT source files only.
    - Do not copy project-init.sh output blindly.
    governed_languages
-   - Include PRODUCT source and PRODUCT-operational script languages.
-   - Exclude FRAMEWORK-only languages.
+   - Include PRODUCT source languages only.
+   - Include a script language only if scripts in that language directly execute,
+     preprocess, deploy, or package the PRODUCT runtime.
+   - Exclude languages used only for repo workflow, lint wrappers, integrity checks,
+     init/state/session tooling, agent framework commands, or other FRAMEWORK
+     or IMPLEMENTATION GOVERNANCE surfaces.
+   - If unsure about scripts/, classify each script by purpose first and derive
+     languages from that classification.
    data_sensitivity
    - Use the strongest evidence available: guardrails/spec/config/schema/example > keywords.
    - If sensitive, also infer legal_framework and data_egress_policy.
@@ -293,7 +326,18 @@ Success test:
      - what integrations are prohibited
      - how sensitive data moves
      - what phase the repo is in
+     - what atomic write / lock / immutability rules apply
+     - what model_config or prompt-hash metadata must be preserved
+     - what filesystem/path safety checks are mandatory
+     - what reviewer identity rules apply
    - If any answer is no, improve the drafts before showing them.
+   Separation check
+   - Are PROJECT_CONFIG.md and ARCHITECTURE.md clearly separated so that
+     operational metadata is not duplicated as architecture and architectural
+     rule tables are not duplicated as config?
+   - If a long rule list appears in both files, move the canonical version to
+     ARCHITECTURE.md and leave only a short digest or pointer in
+     PROJECT_CONFIG.md.
 12. Present one confirmation block, then show the full drafts.
    PROJECT SETUP — INFERRED DEFAULTS
    ─────────────────────────────────────────
@@ -341,7 +385,7 @@ Success test:
    - patterns are actionable
    - constraints are reviewer-checkable
    - Include ## Hard gates, ## Prohibited integrations, and
-     ## Artifact conventions whenever repo evidence supports them
+     Artifact conventions whenever repo evidence supports them
    - unresolved fields become unset — update manually
 16. For each confirmed lint rule:
    - write the rule file to .ai-layer/lint-rules/tier-1/
@@ -350,7 +394,7 @@ Success test:
      mcp_memory_create_entities
      - name: rule name
      - entityType: constraint
-     - observations: ["rule: [description]", "project: [name]"]
+     - observations: ["rule: description", "project: name"]
 17. If docker/Dockerfile exists, update its FROM line:
    - Python primary  → python:3.12-slim
    - Node/TS primary → node:20-slim
@@ -358,4 +402,4 @@ Success test:
 18. For sensitive projects, write this to opencode.json:
    "permission": { "edit": "ask", "bash": "ask" }
 19. Append to .ai-layer/decisions.md:
-   DATE: [today] | INIT | project: [name] | languages: [list] | data_sensitivity: [value] | rules confirmed: [N]
+   DATE: today | INIT | project: name | languages: list | data_sensitivity: value | rules confirmed: N

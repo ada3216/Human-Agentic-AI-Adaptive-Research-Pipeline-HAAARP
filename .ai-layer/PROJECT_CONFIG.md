@@ -1,0 +1,42 @@
+## Project Context
+- project_name: Agentic Human–AI Research Pipeline
+- project_description: Locally executed qualitative-research pipeline that enforces blind and lens-informed two-pass analysis, human evidence adjudication, and auditable artifact integrity for sensitive psychotherapy and health-adjacent studies.
+- project_type: governance-first research pipeline scaffold
+- primary_language: Python
+- governed_languages:
+  - Python
+- runtime_stack: Python 3.10+ CLI modules under `src/`; local Ollama REST inference at `http://localhost:11434`; optional local WhisperX transcription via `src/modules/transcribe_adapter.py`; JSON-schema-governed artifacts under `artifacts/`; optional OSF or institutional deposit for Pass 1 anchor upgrade; Docker template based on `python:3.12-slim`.
+- current_dev_phase: phase 3 of 6 — scaffold implementation with mocked governance verification; Phase 2 integrations (OSF upload, lens dialogue, transcription) remain partial; Phases 4–6 not started
+- repo_boundaries:
+  - product_surface: `src/`, `tests/`, `artifacts/`, `examples/`, `config/`, `docs/`, `docker/`, `notebooks/` (empty — reserved), `osf_deposit_example/` (empty — reserved), `html-archive/` (archived workflow/lens/paper HTML sources), `README.md`, `requirements.txt`
+  - implementation_governance: `implementation docs/`, `GUARDRAILS.md`, `COPILOT_INSTRUCTIONS.md`, `CONTRIBUTING.md`, `HOW_TO_COMPLY.md`, `LICENSE`, `COMMERCIAL_LICENSE.md`, `.github/workflows/ci.yml`, `Makefile`, `docs/error_codes.md`, `config/secrets.example.yaml`, `scripts/check.sh`, `scripts/preflight.sh`, `scripts/lint-check.sh`, `scripts/verify-integrity.sh`, `scripts/lint-adapters/`
+  - framework_tooling: `.opencode/`, `.ai-layer/`, `opencode.json`, `.github/AGENT-SYSTEM.md`, `.github/agents/`, `package.json`, `templates/`, `scripts/project-init.sh`, `scripts/state.sh`, `scripts/retry-budget.sh`, `scripts/session-start.sh`, `scripts/set-autonomy.sh`, `scripts/sync-mag-agent-name.sh`, `scripts/bootstrap.sh`, `scripts/probe-stack.sh`, `scripts/snapshot.sh`, `scripts/phase-complete.sh`
+- custom_models:
+  - planner: unset — update manually
+  - executor: unset — update manually
+  - reviewer: unset — update manually
+## Operational Constraints
+- max_file_lines: 300
+- max_function_lines: 50
+- verification_commands:
+  - lint: `make lint`
+  - test: `make test-local` (`make test` is the identical CI target)
+  - build: N/A
+- required_verification_env:
+  - `MOCK_LLM=true`
+  - `REVIEWER_ID` (only when driving `review_cli.py` non-interactively)
+  - `OSF_TOKEN` (optional runtime only; not needed for tests)
+## Runtime Model Behaviour
+- compensating_constraints:
+  - Participant data must stay on local infrastructure; Ollama is the sole model path; transcription must be local-only.
+  - Pass 2 hard-blocks unless preflight docs exist, Pass 1 hash matches, anchor is externally upgraded, lens is locked and signed, and DPIA is present for `special_category` runs.
+  - `human_verdict` must remain null until set by a human through `src/tools/review_cli.py`.
+  - Governed artifacts require `strand` labels, SHA256 integrity tracking, and append-only behavior after lock points.
+  - Errors must use structured codes from `docs/error_codes.md`; CI and tests must run mocked with no live model or network dependency.
+  - Prompts live under `src/prompts/*.txt`; full constraint details (gates, prohibited integrations, artifact conventions, atomic writes, model_config, filesystem safety, reviewer identity) are canonical in `ARCHITECTURE.md`.
+## Data Sensitivity
+- data_sensitivity: sensitive
+- sensitivity_reason: The pipeline is designed for psychotherapy and health-adjacent qualitative workflows. DPIA gates enforce GDPR Article 9 compliance when `sensitivity` is set to `special_category` in `config/defaults.yaml`. Local-only AI processing and anti-egress safeguards apply to all sensitivity levels.
+- legal_framework: UK GDPR Article 9 + BPS Code of Ethics and Conduct (2021)
+- data_egress_policy: approved external only
+---
