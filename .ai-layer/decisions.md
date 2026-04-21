@@ -47,3 +47,5 @@ DATE: 2026-04-20 | IMPLEMENT | Complete project initialization from confirmed de
 DATE: 2026-04-20 | PLAN | Complete project initialization from confirmed decisions | scope: STRUCTURAL | risk: MEDIUM
 DATE: 2026-04-20 | REVIEW_ATTEST | switched: yes | reason: Cross-model review | policy: recommended
 DATE: 2026-04-20 | REVIEW_FAIL | Complete project initialization from confirmed decisions | 1 items | slot B
+DATE: 2026-04-21 | PLAN | Re-run project-init steps 16-19 with Python-only lint governance | scope: CONTAINED | risk: MEDIUM
+DATE: 2026-04-21 | INIT | project: Agentic Human–AI Research Pipeline | languages: Python | data_sensitivity: sensitive | rules confirmed: 2

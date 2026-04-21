@@ -1,2 +1,0 @@
-# shellcheck shell=bash
-# Rule intent: require strict-mode shell scripts with set -uo pipefail.

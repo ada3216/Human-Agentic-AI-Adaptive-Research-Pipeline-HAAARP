@@ -1,44 +1,52 @@
-# Plan: Complete project initialization from confirmed decisions
-
-Scope: STRUCTURAL
+Plan: Re-run project-init steps 16-19 with Python-only lint governance
+Scope: CONTAINED
 Risk: MEDIUM
-Date: 2026-04-20
+Date: 2026-04-21
+Target surface: MIXED
 
-## Design decisions resolved
-- Accept inferred defaults.
-- Project type set to `production`.
-- Data sensitivity set to `sensitive` (therapy/health/special-category + DPIA workflow reason retained).
-- Custom models remain unset for planner/executor/reviewer.
-- Remove runtime verbosity from PROJECT_CONFIG entirely.
-- Accept inferred project ethos.
-- Proceed directly to implementation after planning.
+Context sources used
+- `.opencode/commands/project-init.md` (steps 16-19 requirements)
+- `.ai-layer/PROJECT_CONFIG.md` (authoritative governed_languages=Python, sensitivity=sensitive)
+- `.ai-layer/ARCHITECTURE.md` (authoritative governance constraints)
+- `.ai-layer/lint-rules/tier-1/*` (current rule inventory)
+- `docker/Dockerfile` (FROM baseline check)
+- `opencode.json` (permission block check)
+- `.ai-layer/decisions.md` (append-only INIT logging)
 
-## Why this approach
-Write the initialization artifacts in one coordinated pass so configuration, architecture, lint governance, container baseline, permissions, and audit log stay internally consistent for a sensitive production repository. An incremental alternative (updating files piecemeal over multiple phases) was not chosen because it increases drift risk between PROJECT_CONFIG, ARCHITECTURE, rule files, and permissions during setup.
+Architectural constraints this plan operates within
+- Governed languages are Python-only; lint artifacts must not include non-governed language rules.
+- Sensitive-project permissions must remain `"permission": { "edit": "ask", "bash": "ask" }`.
+- Docker base image for Python-primary remains `python:3.12-slim`.
+- decisions.md is append-only and must record an INIT entry for this rerun.
+- Step 16 requires MCP memory writes via `mcp_memory_create_entities` for each confirmed lint rule (`entityType: constraint`).
 
-## What is being removed
-- Any `runtime_verbosity` (or equivalent runtime verbosity field) from `.ai-layer/PROJECT_CONFIG.md`.
-- Any prior placeholder/unset initialization content replaced by confirmed inferred values.
+Design decisions resolved
+- User-approved design-stop already grants refinement authority to re-run only steps 16-19 against current ARCHITECTURE/PROJECT_CONFIG.
 
-## Implementation steps
-1. Create or overwrite `.ai-layer/PROJECT_CONFIG.md` with required project-init headers and confirmed values: project name/description, governed languages, stage, project type `production`, data sensitivity `sensitive`, and custom models unset; omit runtime verbosity field entirely.
-2. Create or overwrite `.ai-layer/ARCHITECTURE.md` with the inferred and confirmed architecture content (summary, patterns, constraints, north star, sensitive data flow, and accepted ethos) aligned to the project-init survey findings.
-3. Create `.ai-layer/lint-rules/tier-1/` artifacts for each detected language with two rules each (8 total rule files) and create a matching `.rules.md` rationale file for every rule.
-4. Inspect `docker/Dockerfile` and update `FROM` to `python:3.12-slim` if the base image differs and mixed-language baseline alignment is required.
-5. Update `opencode.json` by writing the sensitive-project permission block required for this repository profile.
-6. Append an `INIT` entry to `.ai-layer/decisions.md` with today’s date and the confirmed initialization values, explicitly noting runtime verbosity removal and accepted inferred defaults.
-7. Validate resulting artifacts and state handoff expectations for review readiness (implementation will set `pending_review=true` at completion).
+Why this approach
+This narrows execution to the approved post-draft initialization tail, aligns lint governance with authoritative Python-only scope, and avoids re-running broader project-init discovery/drafting work that is out of scope.
 
-## Acceptance criteria
-- `test -f .ai-layer/PROJECT_CONFIG.md` passes and the file includes required project-init section headers.
-- `grep -n "runtime_verbosity\|verbosity" .ai-layer/PROJECT_CONFIG.md` returns no runtime verbosity field entries.
-- `test -f .ai-layer/ARCHITECTURE.md` passes and contains inferred/confirmed summary, patterns, constraints, north star, sensitive data flow, and ethos.
-- `test -d .ai-layer/lint-rules/tier-1` passes and exactly 16 new tier-1 files exist (8 rule files + 8 matching `.rules.md` rationale files).
-- `grep -n "^FROM " docker/Dockerfile` shows `FROM python:3.12-slim` when update was needed.
-- `grep -n "sensitive" opencode.json` confirms sensitive-project permission block was written.
-- `.ai-layer/decisions.md` contains a new `DATE: 2026-04-20 | INIT | ...` line with confirmed values.
-- Post-implementation workflow expectation is explicit: review handoff requires `pending_review=true`.
+What is being removed
+- Non-governed tier-1 lint rule files and docs for JavaScript, TypeScript, and Shell under `.ai-layer/lint-rules/tier-1/`.
+- Any extra Python tier-1 rule artifacts beyond exactly two rules and their two matching `.rules.md` files.
 
-## Notes
-- `ARCHITECTURE.md` is currently absent; this initialization writes the canonical file from confirmed survey inference.
-- No further DESIGN_STOP is required because all listed decisions were explicitly confirmed.
+Implementation steps
+1. Reconcile `.ai-layer/lint-rules/tier-1/` to Python-only: keep/create exactly two Python rules (`python-module-size.ruff.toml`, `python-pattern-no-print.ruff.toml`) and matching docs (`python-module-size.rules.md`, `python-pattern-no-print.rules.md`); delete JS/TS/Shell tier-1 rule files.
+2. Execute step-16 memory expectations: create two MCP memory constraint entities (one per confirmed Python rule) using `mcp_memory_create_entities` with rule description and project name observations.
+3. Verify `docker/Dockerfile` FROM is exactly `python:3.12-slim`; update only if drifted.
+4. Verify `opencode.json` permission block is `edit=ask` and `bash=ask`; update only if drifted.
+5. Append one INIT record to `.ai-layer/decisions.md` dated today with project name, Python language list, sensitive classification, and `rules confirmed: 2`.
+
+Acceptance criteria
+- `.ai-layer/lint-rules/tier-1/` contains exactly 4 relevant Python tier-1 artifacts: 2 rule files (`*.ruff.toml`) + 2 matching `.rules.md`, with no JS/TS/Shell tier-1 rule files remaining.
+- MCP memory creation is performed for exactly 2 constraint entities, one per confirmed Python rule (step 16 compliance).
+- `docker/Dockerfile` contains `FROM python:3.12-slim`.
+- `opencode.json` contains `"permission": { "edit": "ask", "bash": "ask" }`.
+- `.ai-layer/decisions.md` has a new append-only INIT entry for 2026-04-21 ending with `rules confirmed: 2`.
+- Key governance constraint still holds: configured governed language scope is Python-only per `.ai-layer/PROJECT_CONFIG.md`.
+
+─────────────────────────────────────────
+NEXT STEP
+Command:  /implement
+Action:   Review the plan above. Run /implement to proceed.
+─────────────────────────────────────────
