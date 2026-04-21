@@ -8,10 +8,8 @@
     "./.opencode/plugins/gatekeeper.js"
   ],
   "permission": {
-    "profile": "sensitive-project",
-    "network": "deny-by-default",
-    "secrets": "no-repo-storage",
-    "data_egress": "explicit-approval-required"
+    "edit": "ask",
+    "bash": "ask"
   },
   "mcp": {
     "memory": {
