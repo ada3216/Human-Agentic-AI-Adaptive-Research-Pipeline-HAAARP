@@ -49,3 +49,5 @@ DATE: 2026-04-20 | REVIEW_ATTEST | switched: yes | reason: Cross-model review | 
 DATE: 2026-04-20 | REVIEW_FAIL | Complete project initialization from confirmed decisions | 1 items | slot B
 DATE: 2026-04-21 | PLAN | Re-run project-init steps 16-19 with Python-only lint governance | scope: CONTAINED | risk: MEDIUM
 DATE: 2026-04-21 | INIT | project: Agentic Human–AI Research Pipeline | languages: Python | data_sensitivity: sensitive | rules confirmed: 2
+DATE: 2026-04-21 | IMPLEMENT | Re-run project-init steps 16-19 with Python-only lint governance | complete | slot was: A | commit: 83a4657
+DATE: 2026-04-21 | IMPLEMENT | limitation: MCP memory entity write commands unavailable in runtime; file-level step-16 updates completed.
