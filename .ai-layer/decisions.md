@@ -59,3 +59,4 @@ DATE: 2026-04-23 | DESIGN_DECISION | sensitive data flow statement | chosen: Int
 DATE: 2026-04-23 | INIT | project: Agentic Human–AI Research Pipeline | languages: Python | data_sensitivity: sensitive | rules confirmed: 7
 DATE: 2026-04-23 | PLAN | Fix lint layer remediation — 3 issues from project-init review | scope: CONTAINED | risk: LOW
 DATE: 2026-04-23 | IMPLEMENT | Fix lint layer: Makefile target fixed, 6 ruff files corrected, glob-ability rule added | complete | slot was: B | commit: dc4afd6
+DATE: 2026-04-23 | COMMIT | fix(lint): ruff rule corrections and Makefile fix committed
