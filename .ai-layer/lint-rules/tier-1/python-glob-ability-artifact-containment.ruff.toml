@@ -1,0 +1,9 @@
+# RUFF-LIMITATION: Ruff cannot enforce that only src/modules/ and src/tools/
+# write to artifacts/ paths. banned-api works on import names, not string literals.
+#
+# CI-ALTERNATIVE (double-quote paths):
+#   grep -rn '"artifacts/' src/ tests/ | grep -vE "^(src/modules/|src/tools/)" \
+#     | grep -v "#" && echo "VIOLATION: artifacts/ outside allowed modules" && exit 1 || true
+# CI-ALTERNATIVE (single-quote paths):
+#   grep -rn "'artifacts/" src/ tests/ | grep -vE "^(src/modules/|src/tools/)" \
+#     | grep -v "#" && echo "VIOLATION: artifacts/ outside allowed modules" && exit 1 || true

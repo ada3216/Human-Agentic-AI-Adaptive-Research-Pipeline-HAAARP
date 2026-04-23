@@ -7,6 +7,7 @@ api_base defaults to http://localhost:11434 (Ollama default).
 If MOCK_LLM=true (env var), returns synthetic responses without network access.
 Required for all automated tests — always set MOCK_LLM=true in test runs.
 """
+
 import os
 import json
 from typing import Optional
@@ -14,45 +15,49 @@ from typing import Optional
 
 # ── Synthetic mock responses ─────────────────────────────────────────────────
 
-_MOCK_PASS1_RESPONSE = json.dumps({
-    "strand": "IPA",
-    "run_label": "pass1_blind",
-    "pass1_themes": [
-        {
-            "theme_id": "T1",
-            "label": "Difficulty articulating distress",
-            "candidate_statements": ["felt like too much to explain"],
-            "participant_codes": [],
-            "excerpt_count": 1,
-        },
-        {
-            "theme_id": "T2",
-            "label": "Anticipation of not being understood",
-            "candidate_statements": ["no one would quite understand what I meant"],
-            "participant_codes": [],
-            "excerpt_count": 1,
-        },
-    ],
-})
+_MOCK_PASS1_RESPONSE = json.dumps(
+    {
+        "strand": "IPA",
+        "run_label": "pass1_blind",
+        "pass1_themes": [
+            {
+                "theme_id": "T1",
+                "label": "Difficulty articulating distress",
+                "candidate_statements": ["felt like too much to explain"],
+                "participant_codes": [],
+                "excerpt_count": 1,
+            },
+            {
+                "theme_id": "T2",
+                "label": "Anticipation of not being understood",
+                "candidate_statements": ["no one would quite understand what I meant"],
+                "participant_codes": [],
+                "excerpt_count": 1,
+            },
+        ],
+    }
+)
 
-_MOCK_PASS2_RESPONSE = json.dumps({
-    "strand": "IPA",
-    "run_label": "seed42",
-    "claims": [
-        {
-            "claim_id": "CL001",
-            "claim_text": "Participants demonstrated ambivalence about help-seeking.",
-            "supporting_segments": [],
-            "confidence": "moderate",
-        },
-        {
-            "claim_id": "CL002",
-            "claim_text": "Anticipation of misunderstanding functioned as a relational barrier.",
-            "supporting_segments": [],
-            "confidence": "moderate",
-        },
-    ],
-})
+_MOCK_PASS2_RESPONSE = json.dumps(
+    {
+        "strand": "IPA",
+        "run_label": "seed42",
+        "claims": [
+            {
+                "claim_id": "CL001",
+                "claim_text": "Participants demonstrated ambivalence about help-seeking.",
+                "supporting_segments": [],
+                "confidence": "moderate",
+            },
+            {
+                "claim_id": "CL002",
+                "claim_text": "Anticipation of misunderstanding functioned as a relational barrier.",
+                "supporting_segments": [],
+                "confidence": "moderate",
+            },
+        ],
+    }
+)
 
 _MOCK_LENS_SUMMARY = (
     "1. Theoretical framework: Constructivist phenomenological approach informed by "
@@ -70,6 +75,7 @@ _MOCK_LENS_SUMMARY = (
 
 
 # ── Client ───────────────────────────────────────────────────────────────────
+
 
 def call_generate(
     api_base: str,
@@ -124,12 +130,13 @@ def call_generate(
         return result.get("response", "")
 
     except Exception as exc:
-        raise ValueError(
+        msg = (
             f"[ERR_PREFLIGHT_MISSING] Ollama not reachable at {api_base}.\n"
             f"Action: Start Ollama with: ollama serve\n"
             f"        Then pull the model: ollama pull {model}\n"
             f"Detail: {exc}"
-        ) from exc
+        )
+        raise ValueError(msg) from exc
 
 
 def _mock_response(system_prompt: str, seed: Optional[int], temperature: float) -> str:

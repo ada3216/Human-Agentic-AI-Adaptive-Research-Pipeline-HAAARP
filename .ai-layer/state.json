@@ -4,9 +4,10 @@
   "autonomy": "informed-yolo",
   "implement_slot": "B",
   "pending_review": false,
-  "current_task": "Re-run project-init steps 16-19 with Python-only lint governance",
-  "last_completed_phase": "Re-run project-init steps 16-19 with Python-only lint governance",
+  "current_task": "Fix lint layer",
+  "last_completed_phase": "Fix lint layer",
   "design_stop_pending": false,
   "design_stop_question": null,
-  "init_complete": false
+  "init_complete": false,
+  "plan_review_pending": true
 }

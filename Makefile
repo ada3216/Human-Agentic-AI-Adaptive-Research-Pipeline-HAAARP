@@ -9,7 +9,7 @@ test:
 	MOCK_LLM=true pytest tests/ -v
 
 lint:
-	flake8 src/ tests/ --max-line-length=100 --ignore=E501,W503
+	bash scripts/lint-check.sh
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; \
