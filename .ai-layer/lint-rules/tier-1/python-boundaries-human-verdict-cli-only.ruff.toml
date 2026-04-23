@@ -1,9 +1,0 @@
-# RUFF-LIMITATION: Ruff cannot enforce that only src/tools/review_cli.py writes
-# non-null values to the `human_verdict` field. This boundary requires cross-file
-# dataflow analysis — outside ruff's scope.
-#
-# CI-ALTERNATIVE: Add to .github/workflows/ci.yml —
-#   grep -rn "human_verdict" src/ \
-#     | grep -v "src/tools/review_cli.py" \
-#     | grep -vE '(null|None|#)' \
-#     && echo "VIOLATION: human_verdict written outside review_cli.py" && exit 1 || true

@@ -1,8 +1,0 @@
-# RUFF-LIMITATION: Ruff cannot enforce artifact filename conventions
-# (pass1_output_*, pass1_anchor_*, pass2_output_*, evidence_review_*, audit_bundle_*).
-# Checking string literals at call sites is outside ruff's scope.
-#
-# CI-ALTERNATIVE: grep -rn "artifacts/" src/ \
-#   | grep -vE "(pass1_output_|pass1_anchor_|pass2_output_|evidence_review_|audit_bundle_)" \
-#   | grep -vE "(#|\.rules\.md)" \
-#   && echo "VIOLATION: artifact path does not match naming pattern" && exit 1 || true
