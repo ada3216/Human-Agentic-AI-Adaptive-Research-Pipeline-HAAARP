@@ -17,7 +17,13 @@
 
 ## Operational Constraints
 - max_file_lines: 300
+- max_file_lines_exempt_globs:
+  - ".ai-layer/current-plan.md": 500
+  - ".ai-layer/PROJECT_CONFIG.md": 500
+  - ".opencode/commands/project-init.md": 500
+  - "implementation docs/*.md": 500
 - max_function_lines: 50
+- max_function_lines_exemption_policy: A function may exceed 50 lines only when it is a single cohesive atomic unit (e.g. argparse setup + sequential validation) that would lose clarity if split. The function must include an inline comment `# EXEMPT: cohesive atomic unit` at its definition line. Reviewers may reject the exemption.
 - verification_commands:
   - lint: `make lint`
   - test: `make test-local` (`make test` is equivalent CI target)

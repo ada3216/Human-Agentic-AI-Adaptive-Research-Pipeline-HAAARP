@@ -1,6 +1,5 @@
 [lint]
 dummy-variable-rgx = "^(_|ignored_[a-z0-9_]+)$"
-extend-select = ["EM101", "EM102", "EM103"]
 
 [lint.flake8-tidy-imports]
 ban-relative-imports = "all"

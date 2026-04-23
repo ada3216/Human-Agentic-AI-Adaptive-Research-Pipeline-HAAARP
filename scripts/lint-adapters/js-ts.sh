@@ -28,6 +28,14 @@ json.dump({
 }, open(out, "w"))
 PYEOF
 
+# Skip if no governed JS/TS source files exist (governed_languages: python)
+JS_FILES=$(find . -type f \( -name '*.js' -o -name '*.ts' -o -name '*.jsx' -o -name '*.tsx' -o -name '*.mjs' -o -name '*.cjs' \) \
+  ! -path '*/node_modules/*' ! -path './.opencode/plugins/*' 2>/dev/null)
+if [ -z "$JS_FILES" ]; then
+  echo "SKIP: no governed JS/TS files found"
+  exit 0
+fi
+
 ./node_modules/.bin/eslint \
   --no-eslintrc --config "$CONFIG" \
   --ext .js,.ts,.jsx,.tsx,.mjs,.cjs \
