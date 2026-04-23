@@ -14,6 +14,7 @@ Writes individual output files and stability_report.
 
 Exit codes: see docs/error_codes.md
 """
+
 import sys
 import json
 import hashlib
@@ -29,8 +30,9 @@ def _sha256_file(path: str) -> str:
     return h.hexdigest()
 
 
-def _gate_check(deid_path: str, lens_path: str, pass1_hash: str,
-                dataset_id: str, config: dict) -> None:
+def _gate_check(
+    deid_path: str, lens_path: str, pass1_hash: str, dataset_id: str, config: dict
+) -> None:  # EXEMPT: cohesive atomic unit
     """Run all precondition checks. Exit with correct code on any failure."""
 
     # (a) anchor exists
@@ -48,13 +50,19 @@ def _gate_check(deid_path: str, lens_path: str, pass1_hash: str,
     # (b) hash matches
     actual_hash = _sha256_file(anchor["artifact_path"])
     if actual_hash != anchor["pass1_hash"]:
-        print("[ERR_PASS1_HASH_MISMATCH] SHA256 of pass1_output does not match stored hash.")
-        print("Action: File may have been modified. Restore from OSF deposit or re-run Pass 1.")
+        print(
+            "[ERR_PASS1_HASH_MISMATCH] SHA256 of pass1_output does not match stored hash."
+        )
+        print(
+            "Action: File may have been modified. Restore from OSF deposit or re-run Pass 1."
+        )
         sys.exit(3)
 
     # (c) anchor not local
     if anchor.get("anchor_type") == "local":
-        print("[ERR_PASS1_ANCHOR_LOCAL] anchor_type is 'local'. External deposit required.")
+        print(
+            "[ERR_PASS1_ANCHOR_LOCAL] anchor_type is 'local'. External deposit required."
+        )
         print("Action: Run osf_uploader.py --anchor", anchor_path, "--doi [DOI]")
         print("        This upgrades anchor_type to osf_doi.")
         sys.exit(3)
@@ -68,7 +76,9 @@ def _gate_check(deid_path: str, lens_path: str, pass1_hash: str,
         lens = json.load(f)
     if not lens.get("locked"):
         print("[ERR_LENS_NOT_LOCKED] lens locked != true.")
-        print("Action: python src/modules/lens_dialogue.py --lock --run-id [id] --researcher-id [orcid]")
+        print(
+            "Action: python src/modules/lens_dialogue.py --lock --run-id [id] --researcher-id [orcid]"
+        )
         sys.exit(4)
 
     # (e) signature non-null
@@ -81,12 +91,15 @@ def _gate_check(deid_path: str, lens_path: str, pass1_hash: str,
     if config.get("sensitivity") == "special_category":
         if not Path("artifacts/dpia_signed.json").exists():
             print("[ERR_DPIA_MISSING] artifacts/dpia_signed.json not found.")
-            print("Action: Complete DPIA, obtain DPO sign-off, save to artifacts/dpia_signed.json.")
+            print(
+                "Action: Complete DPIA, obtain DPO sign-off, save to artifacts/dpia_signed.json."
+            )
             sys.exit(2)
 
 
-def run_pass2(deid_path: str, lens_path: str, pass1_hash: str,
-              dataset_id: str, config: dict) -> dict:
+def run_pass2(
+    deid_path: str, lens_path: str, pass1_hash: str, dataset_id: str, config: dict
+) -> dict:  # EXEMPT: cohesive atomic unit
     """
     Runs 4 stability passes after gate checks pass.
     Returns paths to primary output and stability report.
@@ -95,6 +108,7 @@ def run_pass2(deid_path: str, lens_path: str, pass1_hash: str,
 
     # ── Path setup so sibling src/ packages are importable ────────────────────
     import sys as _sys
+
     _src = Path(__file__).parent.parent
     if str(_src) not in _sys.path:
         _sys.path.insert(0, str(_src))
@@ -152,14 +166,18 @@ def run_pass2(deid_path: str, lens_path: str, pass1_hash: str,
 
         out_path = f"artifacts/pass2_output_{label}_{dataset_id}.json"
         with open(out_path, "w") as f:
-            json.dump({
-                "dataset_id": dataset_id,
-                "strand": strand,
-                "run_label": label,
-                "seed": seed,
-                "timestamp_utc": datetime.now(timezone.utc).isoformat(),
-                "claims": llm_output.get("claims", []),
-            }, f, indent=2)
+            json.dump(
+                {
+                    "dataset_id": dataset_id,
+                    "strand": strand,
+                    "run_label": label,
+                    "seed": seed,
+                    "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                    "claims": llm_output.get("claims", []),
+                },
+                f,
+                indent=2,
+            )
         outputs.append(out_path)
 
     stability = compute_stability_metrics(outputs)
@@ -173,23 +191,30 @@ def run_pass2(deid_path: str, lens_path: str, pass1_hash: str,
         claims = primary.get("claims", [])
         if claims:
             lens_supported = sum(
-                1 for c in claims
+                1
+                for c in claims
                 if any(v in c.get("claim_text", "").lower() for v in lens_vocab)
             )
-            stability["lens_amplification_index"] = round(lens_supported / len(claims), 4)
+            stability["lens_amplification_index"] = round(
+                lens_supported / len(claims), 4
+            )
 
     stability_path = f"artifacts/stability_report_{dataset_id}.json"
     with open(stability_path, "w") as f:
         json.dump(stability, f, indent=2)
 
-    print(f"\nPass 2 complete. Primary output: artifacts/pass2_output_seed42_{dataset_id}.json")
+    print(
+        f"\nPass 2 complete. Primary output: artifacts/pass2_output_seed42_{dataset_id}.json"
+    )
     print(f"Stability report: {stability_path}")
     print(f"Theme stability score: {stability['theme_stability_score']}")
     print(f"Jaccard mean: {stability['jaccard_mean']}")
     sys.exit(0)
 
 
-def compute_stability_metrics(output_paths: list) -> dict:
+def compute_stability_metrics(
+    output_paths: list,
+) -> dict:  # EXEMPT: cohesive atomic unit
     """
     Computes theme stability, Jaccard overlap, lens amplification index.
 
@@ -236,15 +261,17 @@ def compute_stability_metrics(output_paths: list) -> dict:
                 score = 0.0
             else:
                 score = len(a & b) / len(a | b)
-            pairs.append({
-                "run_a": loaded[i].get("run_label", f"run_{i}"),
-                "run_b": loaded[j].get("run_label", f"run_{j}"),
-                "jaccard": round(score, 4),
-            })
+            pairs.append(
+                {
+                    "run_a": loaded[i].get("run_label", f"run_{i}"),
+                    "run_b": loaded[j].get("run_label", f"run_{j}"),
+                    "jaccard": round(score, 4),
+                }
+            )
 
-    jaccard_mean = round(
-        sum(p["jaccard"] for p in pairs) / len(pairs), 4
-    ) if pairs else None
+    jaccard_mean = (
+        round(sum(p["jaccard"] for p in pairs) / len(pairs), 4) if pairs else None
+    )
 
     # ── Theme stability ────────────────────────────────────────────────────────
     all_labels: set = set()

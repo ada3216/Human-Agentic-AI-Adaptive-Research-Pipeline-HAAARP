@@ -21,3 +21,4 @@ Steps:
 
 4. Output one line: probed — verbosity=[high|normal], constraints=[written|none]
 5. Surface advisory: "NOTE: /probe writes to PROJECT_CONFIG.md, which OpenCode loads as session instructions at session start. Changes from this probe take effect in the next session, not this one."
+6. End with a clean git commit after governed-file edits.

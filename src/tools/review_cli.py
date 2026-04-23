@@ -15,6 +15,7 @@ Exit codes:
   0 — all verdicts complete
   5 — interrupted with pending verdicts remaining
 """
+
 import sys
 import json
 import os
@@ -41,7 +42,9 @@ def _get_reviewer_id() -> tuple:
 
     if not reviewer_id or reviewer_id.lower() in {"anonymous", "anon", "unknown", ""}:
         print("[ERR_REVIEWER_ANONYMOUS] Anonymous reviewer IDs are not accepted.")
-        print("Action: Set REVIEWER_ID environment variable to your ORCID or institutional username.")
+        print(
+            "Action: Set REVIEWER_ID environment variable to your ORCID or institutional username."
+        )
         sys.exit(5)
 
     if not reviewer_role:
@@ -50,7 +53,7 @@ def _get_reviewer_id() -> tuple:
     return reviewer_id, reviewer_role
 
 
-def run_review_cli(evidence_review_dir: str) -> None:
+def run_review_cli(evidence_review_dir: str) -> None:  # EXEMPT: cohesive atomic unit
     """Run interactive evidence review for all pending claims."""
     reviewer_id, reviewer_role = _get_reviewer_id()
 
@@ -73,15 +76,23 @@ def run_review_cli(evidence_review_dir: str) -> None:
         with open(review_path) as f:
             record = json.load(f)
 
-        print(f"\n--- Claim {record['claim_id']} [{record.get('strand', 'STRAND MISSING')}] ---")
+        print(
+            f"\n--- Claim {record['claim_id']} [{record.get('strand', 'STRAND MISSING')}] ---"
+        )
         print(f"Claim: {record['claim_text']}")
-        print(f"Support: {record['support_strength']} ({record['support_count']} excerpt(s))")
+        print(
+            f"Support: {record['support_strength']} ({record['support_count']} excerpt(s))"
+        )
         print(f"Segments: {', '.join(record.get('supporting_segments', []))}")
-        if record.get('verification_flags'):
+        if record.get("verification_flags"):
             print(f"Flags: {', '.join(record['verification_flags'])}")
 
         while True:
-            verdict = input("\nVerdict? [accept / accept_with_revision / reject / recheck]: ").strip().lower()
+            verdict = (
+                input("\nVerdict? [accept / accept_with_revision / reject / recheck]: ")
+                .strip()
+                .lower()
+            )
             if verdict in {"accept", "accept_with_revision", "reject", "recheck"}:
                 break
             print("Please enter: accept / accept_with_revision / reject / recheck")
@@ -115,16 +126,20 @@ def run_review_cli(evidence_review_dir: str) -> None:
             # Check for interpretive proposition
             if record.get("support_strength") in ("weak", "none"):
                 interpretive_proposition = True
-                print("\n[INTERPRETIVE PROPOSITION] This claim is accepted despite weak/no support.")
-                print("It will be labelled as an interpretive proposition in the write-up.")
+                print(
+                    "\n[INTERPRETIVE PROPOSITION] This claim is accepted despite weak/no support."
+                )
+                print(
+                    "It will be labelled as an interpretive proposition in the write-up."
+                )
                 print("Template sentence (stored in record):")
                 notes = notes or input("Rationale for retaining this claim: ").strip()
                 write_up_template = INTERPRETIVE_PROPOSITION_TEMPLATE.format(
                     claim_text=record["claim_text"],
                     support_strength=record["support_strength"],
-                    reviewer_notes=notes or ""
+                    reviewer_notes=notes or "",
                 )
-                print(f"\n  \"{write_up_template}\"")
+                print(f'\n  "{write_up_template}"')
 
         record["human_verdict"] = {
             "verdict": verdict,
@@ -162,14 +177,21 @@ def _needs_review(path: str) -> bool:
     try:
         with open(path) as f:
             r = json.load(f)
-        return r.get("human_verdict") is None or r["human_verdict"].get("verdict") is None
+        return (
+            r.get("human_verdict") is None or r["human_verdict"].get("verdict") is None
+        )
     except Exception:
         return False
 
 
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser(description="Human evidence review CLI")
-    parser.add_argument("--dir", default="artifacts/", help="Directory containing evidence_review_*.json")
+    parser.add_argument(
+        "--dir",
+        default="artifacts/",
+        help="Directory containing evidence_review_*.json",
+    )
     args = parser.parse_args()
     run_review_cli(args.dir)

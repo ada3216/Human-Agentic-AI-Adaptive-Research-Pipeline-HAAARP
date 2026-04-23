@@ -16,3 +16,4 @@ If 50 or more entries:
   Do not modify any entry from the last 30 days.
   Append: DATE: [today] | COMPACTION | [N] entries archived.
   Report: "Compacted [N] entries. Consider reviewing .ai-layer/ARCHITECTURE.md — after this many decisions the project's actual patterns may have evolved beyond what ARCHITECTURE.md currently captures. Update manually or re-run /project-init."
+  End with a clean git commit after governed-file edits.

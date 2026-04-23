@@ -12,3 +12,4 @@ Read:
 Produce the PRIME CONTEXT block exactly as specified in the skill.
 If ACTION REQUIRED lines apply, surface them above the context block.
 Output nothing else.
+If this command edits governed files directly, end with a clean git commit before exit.

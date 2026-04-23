@@ -17,21 +17,21 @@ fi
 # 2. npm install
 # Node.js is required for the MCP memory server regardless of project language.
 # Python-only projects still need Node.js for this one component.
+MCP_ENTRY="node_modules/@modelcontextprotocol/server-memory/dist/index.js"
 if ! command -v node &>/dev/null; then
-  echo "⚠ Node.js not found. Required for MCP memory server."
-  echo "  Install: https://nodejs.org — then re-run bootstrap.sh"
-  echo "  (Python projects still need Node.js for the memory server)"
-fi
-if [ -f package.json ]; then
-  echo "Installing npm dependencies..."
-  npm install --silent && echo "✓ npm install complete (versions pinned in package-lock.json)"
+  echo "ERROR: Node.js not found. Required for MCP memory server."
+  echo "Install: https://nodejs.org and then re-run scripts/bootstrap.sh"
+  exit 1
 fi
 
 # 3. Verify MCP memory server
-if [ -f node_modules/@modelcontextprotocol/server-memory/dist/index.js ]; then
+if [ -f "$MCP_ENTRY" ]; then
   echo "✓ MCP memory server available (local)"
 else
-  echo "⚠ MCP memory server not found — run: npm install"
+  echo "ERROR: MCP memory server entry missing: $MCP_ENTRY"
+  echo "Run: npm install"
+  echo "This repository keeps MCP dependencies at the repo root alongside package-lock.json."
+  exit 1
 fi
 
 # 4. npm audit (advisory — surfaces known vulnerabilities in pinned dependencies)

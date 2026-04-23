@@ -57,3 +57,4 @@ For each proposal reply: APPROVE, REJECT <reason>, or DEFER.
 APPROVE — executor implements in next session.
 REJECT  — reason recorded in rejected-rules.md; will not be re-proposed.
 DEFER   — stays in proposals.md for next /lint-evolve run.
+If this command edits governed files directly, end with a clean git commit before exit.

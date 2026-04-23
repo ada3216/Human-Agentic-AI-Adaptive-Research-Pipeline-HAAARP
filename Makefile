@@ -9,7 +9,7 @@ test:
 	MOCK_LLM=true pytest tests/ -v
 
 lint:
-	bash scripts/lint-check.sh
+	bash scripts/lint-check.sh && bash scripts/size-check.sh
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; \

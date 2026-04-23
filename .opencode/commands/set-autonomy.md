@@ -19,3 +19,4 @@ If no argument is provided:
 
 Invalid argument:
   Show valid options and the current setting. Do not write anything.
+If this command edits governed files directly, end with a clean git commit before exit.

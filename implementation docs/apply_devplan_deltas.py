@@ -231,7 +231,7 @@ def apply_deltas(text: str, dry_run: bool = False):
     return text, results
 
 
-def main():
+def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Apply v2.2 deltas to the dev plan.")
     parser.add_argument(
         "--file", help="Path to dev plan .md file (auto-detected if omitted)"
@@ -239,10 +239,12 @@ def main():
     parser.add_argument(
         "--dry-run", action="store_true", help="Preview only, no writes"
     )
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    if args.file:
-        target = Path(args.file)
+
+def _resolve_target(file_arg: str | None) -> Path:
+    if file_arg:
+        target = Path(file_arg)
     else:
         candidates = list(Path(".").glob("Agentic_Pipeline_Dev_Plan*.md"))
         if not candidates:
@@ -258,6 +260,31 @@ def main():
     if not target.exists():
         print(f"ERROR: File not found: {target}")
         sys.exit(1)
+    return target
+
+
+def _print_results(results: list[dict]) -> list[dict]:
+    passed = [r for r in results if "OK" in r["status"]]
+    failed = [r for r in results if "FAIL" in r["status"]]
+    print("\nResults:")
+    print("-" * 65)
+    for result in results:
+        icon = "\u2713" if "OK" in result["status"] else "\u2717"
+        print(
+            f"  {icon} [{result['id']:>10}]  {result['status']:<22}"
+            f"  {result['description']}"
+        )
+    print("-" * 65)
+    print(
+        f"  Passed: {len(passed)}/{len(results)}"
+        f"    Failed: {len(failed)}/{len(results)}\n"
+    )
+    return failed
+
+
+def main():
+    args = _parse_args()
+    target = _resolve_target(args.file)
 
     print(
         f"\n{'DRY RUN \u2014 ' if args.dry_run else ''}Applying deltas to: {target}\n"
@@ -270,19 +297,7 @@ def main():
 
     original = target.read_text(encoding="utf-8")
     patched, results = apply_deltas(original, dry_run=args.dry_run)
-
-    passed = [r for r in results if "OK" in r["status"]]
-    failed = [r for r in results if "FAIL" in r["status"]]
-
-    print("\nResults:")
-    print("-" * 65)
-    for r in results:
-        icon = "\u2713" if "OK" in r["status"] else "\u2717"
-        print(f"  {icon} [{r['id']:>10}]  {r['status']:<22}  {r['description']}")
-    print("-" * 65)
-    print(
-        f"  Passed: {len(passed)}/{len(results)}    Failed: {len(failed)}/{len(results)}\n"
-    )
+    failed = _print_results(results)
 
     if failed and not args.dry_run:
         print(f"WARNING: {len(failed)} delta(s) not applied. Apply manually.")

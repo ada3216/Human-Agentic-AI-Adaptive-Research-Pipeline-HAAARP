@@ -12,12 +12,19 @@ else
   echo "SKIP: lint-check.sh absent — run /project-init first"
 fi
 
+section "Size limits"
+if [ -f scripts/size-check.sh ]; then
+  bash scripts/size-check.sh || { echo "FAIL: size limits"; FAIL=$((FAIL+1)); }
+else
+  echo "SKIP: size-check.sh absent"
+fi
+
 section "Secrets"
 if command -v gitleaks &>/dev/null; then
   gitleaks detect --no-git --source . --exit-code 1 2>/dev/null \
     || { echo "FAIL: secrets scan"; FAIL=$((FAIL+1)); }
 else
-  if grep -q "^data_sensitivity: sensitive$" .ai-layer/PROJECT_CONFIG.md 2>/dev/null; then
+  if grep -q "^- data_sensitivity: sensitive$" .ai-layer/PROJECT_CONFIG.md 2>/dev/null; then
     echo "FAIL: gitleaks is required for sensitive projects."
     FAIL=$((FAIL+1))
   else
@@ -29,7 +36,7 @@ fi
 section "Lockfile integrity"
 if [ -f package-lock.json ] || [ -f poetry.lock ]; then
   if ! git diff --quiet -- package-lock.json poetry.lock 2>/dev/null; then
-    if grep -q "^data_sensitivity: sensitive$" .ai-layer/PROJECT_CONFIG.md 2>/dev/null; then
+    if grep -q "^- data_sensitivity: sensitive$" .ai-layer/PROJECT_CONFIG.md 2>/dev/null; then
       echo "FAIL: lockfile changed in a sensitive project without /freeze-audit"
       FAIL=$((FAIL+1))
     else
@@ -58,10 +65,10 @@ else
 fi
 
 section "Tests (Python)"
-if [ -f pytest.ini ] || [ -f pyproject.toml ]; then
-  python3 -m pytest --tb=short -q || { echo "FAIL: pytest"; FAIL=$((FAIL+1)); }
+if [ -d tests ]; then
+  MOCK_LLM=true python3 -m pytest tests/ --tb=short -q || { echo "FAIL: pytest"; FAIL=$((FAIL+1)); }
 else
-  echo "SKIP: no pytest config"
+  echo "SKIP: no tests directory"
 fi
 
 echo ""

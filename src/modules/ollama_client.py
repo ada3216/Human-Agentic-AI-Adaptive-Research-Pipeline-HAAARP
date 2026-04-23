@@ -107,36 +107,56 @@ def call_generate(
     try:
         import urllib.request
 
-        payload: dict = {
-            "model": model,
-            "system": system_prompt,
-            "prompt": user_prompt,
-            "stream": False,
-            "options": {
-                "temperature": temperature,
-            },
-        }
-        if seed is not None:
-            payload["options"]["seed"] = seed
-
-        data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(
-            f"{api_base}/api/generate",
-            data=data,
-            headers={"Content-Type": "application/json"},
+        request = _build_ollama_request(
+            api_base,
+            model,
+            system_prompt,
+            user_prompt,
+            temperature,
+            seed,
         )
-        with urllib.request.urlopen(req, timeout=300) as response:
+        with urllib.request.urlopen(request, timeout=300) as response:
             result = json.loads(response.read().decode("utf-8"))
         return result.get("response", "")
 
     except Exception as exc:
-        msg = (
-            f"[ERR_PREFLIGHT_MISSING] Ollama not reachable at {api_base}.\n"
-            f"Action: Start Ollama with: ollama serve\n"
-            f"        Then pull the model: ollama pull {model}\n"
-            f"Detail: {exc}"
-        )
-        raise ValueError(msg) from exc
+        raise ValueError(_format_ollama_error(api_base, model, exc)) from exc
+
+
+def _build_ollama_request(
+    api_base: str,
+    model: str,
+    system_prompt: str,
+    user_prompt: str,
+    temperature: float,
+    seed: Optional[int],
+):
+    import urllib.request
+
+    payload: dict = {
+        "model": model,
+        "system": system_prompt,
+        "prompt": user_prompt,
+        "stream": False,
+        "options": {"temperature": temperature},
+    }
+    if seed is not None:
+        payload["options"]["seed"] = seed
+
+    return urllib.request.Request(
+        f"{api_base}/api/generate",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+
+
+def _format_ollama_error(api_base: str, model: str, exc: Exception) -> str:
+    return (
+        f"[ERR_PREFLIGHT_MISSING] Ollama not reachable at {api_base}.\n"
+        f"Action: Start Ollama with: ollama serve\n"
+        f"        Then pull the model: ollama pull {model}\n"
+        f"Detail: {exc}"
+    )
 
 
 def _mock_response(system_prompt: str, seed: Optional[int], temperature: float) -> str:

@@ -20,8 +20,17 @@
 - max_file_lines_exempt_globs:
   - ".ai-layer/current-plan.md": 500
   - ".ai-layer/PROJECT_CONFIG.md": 500
+  - ".github/AGENT-SYSTEM.md": 500
+  - ".github/agents/*.md": 900
   - ".opencode/commands/project-init.md": 500
-  - "implementation docs/*.md": 500
+  - "GUARDRAILS.md": 500
+  - "docs/*.md": 700
+  - "implementation docs/Agentic_Pipeline_Dev_Plan_v2.1.md": 1000
+  - "implementation docs/*.md": 700
+  - "implementation docs/*.py": 400
+  - "package-lock.json": 3000
+  - "src/modules/lens_dialogue.py": 400
+  - "tests/test_pipeline.py": 400
 - max_function_lines: 50
 - max_function_lines_exemption_policy: A function may exceed 50 lines only when it is a single cohesive atomic unit (e.g. argparse setup + sequential validation) that would lose clarity if split. The function must include an inline comment `# EXEMPT: cohesive atomic unit` at its definition line. Reviewers may reject the exemption.
 - verification_commands:

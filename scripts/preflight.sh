@@ -99,11 +99,11 @@ if [ -f "pyproject.toml" ] || [ -f "requirements.txt" ]; then
   else
     WARNINGS+=("WARNING: pytest not found — test step will fail")
   fi
-  # Check for ruff or flake8
-  if command -v ruff >/dev/null 2>&1 || command -v flake8 >/dev/null 2>&1; then
-    echo "  ✓ Python linter available"
+  # Check for Ruff (required by scripts/lint-check.sh)
+  if command -v ruff >/dev/null 2>&1; then
+    echo "  ✓ Ruff available"
   else
-    WARNINGS+=("WARNING: No Python linter found (ruff or flake8) — lint checks will be skipped")
+    WARNINGS+=("WARNING: Ruff not found — python lint checks will be skipped")
   fi
 fi
 

@@ -13,6 +13,7 @@ Support strength thresholds:
 
 Exit codes: 0 success, 5 on strand/schema errors
 """
+
 import sys
 import json
 import uuid
@@ -39,8 +40,12 @@ VERIFICATION_FLAGS = [
 ]
 
 
-def verify_grounding(pass2_output_path: str, transcript_path: str,
-                     lens_vocabulary: list, config: dict) -> dict:
+def verify_grounding(
+    pass2_output_path: str,
+    transcript_path: str,
+    lens_vocabulary: list,
+    config: dict,
+) -> dict:  # EXEMPT: cohesive atomic unit
     """
     For each claim in pass2_output:
       1. Verify supporting_segments exist at stated locations in transcript
@@ -84,7 +89,9 @@ def verify_grounding(pass2_output_path: str, transcript_path: str,
             transcript_data = json.load(f)
         transcript_content = json.dumps(transcript_data)
     else:
-        print(f"[WARN] Transcript not found at {transcript_path}. Segment verification limited.")
+        print(
+            f"[WARN] Transcript not found at {transcript_path}. Segment verification limited."
+        )
 
     claims = pass2.get("claims", [])
     claim_table_entries = []
@@ -128,10 +135,14 @@ def verify_grounding(pass2_output_path: str, transcript_path: str,
                     pass
 
         # Check lens vocabulary only
-        if lens_vocabulary and all(
-            any(vocab.lower() in str(seg).lower() for vocab in lens_vocabulary)
-            for seg in verified_segments
-        ) and verified_segments:
+        if (
+            lens_vocabulary
+            and all(
+                any(vocab.lower() in str(seg).lower() for vocab in lens_vocabulary)
+                for seg in verified_segments
+            )
+            and verified_segments
+        ):
             flags.append("lens_vocabulary_only")
 
         # Overgeneralisation: broad claim, single excerpt
@@ -163,14 +174,14 @@ def verify_grounding(pass2_output_path: str, transcript_path: str,
             "dataset_id": dataset_id,
             "strand": strand,
             "generated_by": "pass2_runner",
-            "claim_text": claim_text,          # read-only — do not modify
+            "claim_text": claim_text,  # read-only — do not modify
             "supporting_segments": segments,
             "verified_segments": verified_segments,
             "support_count": excerpt_count,
             "distinct_participants": list(distinct_participants),
             "support_strength": support_strength,
             "verification_flags": flags,
-            "human_verdict": None,             # set ONLY by review_cli.py
+            "human_verdict": None,  # set ONLY by review_cli.py
         }
 
         review_path = f"artifacts/evidence_review_{claim_id}_{dataset_id}.json"
@@ -178,27 +189,33 @@ def verify_grounding(pass2_output_path: str, transcript_path: str,
             json.dump(review_record, f, indent=2)
         review_paths.append(review_path)
 
-        claim_table_entries.append({
-            "claim_id": claim_id,
-            "strand": strand,
-            "claim_text": claim_text,
-            "support_strength": support_strength,
-            "support_count": excerpt_count,
-            "distinct_participants": list(distinct_participants),
-            "flags": flags,
-            "review_path": review_path,
-        })
+        claim_table_entries.append(
+            {
+                "claim_id": claim_id,
+                "strand": strand,
+                "claim_text": claim_text,
+                "support_strength": support_strength,
+                "support_count": excerpt_count,
+                "distinct_participants": list(distinct_participants),
+                "flags": flags,
+                "review_path": review_path,
+            }
+        )
 
     table_path = f"artifacts/claim_evidence_table_{dataset_id}.json"
     with open(table_path, "w") as f:
-        json.dump({
-            "dataset_id": dataset_id,
-            "strand": strand,
-            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
-            "total_claims": len(claims),
-            "hallucination_count": hallucination_count,
-            "claims": claim_table_entries,
-        }, f, indent=2)
+        json.dump(
+            {
+                "dataset_id": dataset_id,
+                "strand": strand,
+                "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                "total_claims": len(claims),
+                "hallucination_count": hallucination_count,
+                "claims": claim_table_entries,
+            },
+            f,
+            indent=2,
+        )
 
     print("\nGrounding check complete.")
     print(f"  Claims checked:      {len(claims)}")

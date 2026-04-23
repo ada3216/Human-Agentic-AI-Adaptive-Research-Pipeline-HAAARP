@@ -10,3 +10,4 @@ Before planning, run these checks in order:
 
 If state is clear: invoke the planner with the task brief provided after /plan.
 The planner produces .ai-layer/current-plan.md and fires DESIGN_STOPs if needed.
+If /plan edits governed files directly, end with a clean git commit before exit.

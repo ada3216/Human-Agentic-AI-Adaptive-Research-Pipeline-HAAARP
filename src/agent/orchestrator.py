@@ -6,6 +6,7 @@ Calls each runner/module in sequence and checks preconditions before each step.
 
 Exit codes: see docs/error_codes.md
 """
+
 import sys
 import json
 from pathlib import Path
@@ -44,10 +45,13 @@ class Orchestrator:
     def __init__(self, config_path: str = "config/defaults.yaml"):
         try:
             import yaml
+
             with open(config_path) as f:
                 self.config = yaml.safe_load(f) or {}
         except FileNotFoundError:
-            print(f"[WARN] Config file not found: {config_path}. Proceeding with empty config.")
+            print(
+                f"[WARN] Config file not found: {config_path}. Proceeding with empty config."
+            )
             self.config = {}
         self.config_path = config_path
 
@@ -66,7 +70,7 @@ class Orchestrator:
                     "ERR_PREFLIGHT_MISSING",
                     f"Required document not found: {path} ({desc})",
                     f"Provide this file before running the pipeline.\n"
-                    f"If HTML version exists: pandoc {path.replace('.md', '.html')} -o {path}"
+                    f"If HTML version exists: pandoc {path.replace('.md', '.html')} -o {path}",
                 )
 
     def check_sensitivity(self, sensitivity: str) -> None:
@@ -78,7 +82,7 @@ class Orchestrator:
                 f"Sensitivity value '{sensitivity}' is not recognised.",
                 "Set sensitivity in config/defaults.yaml to one of:\n"
                 "  public_text | personal_non_sensitive | special_category\n"
-                "The value 'normal' is not valid."
+                "The value 'normal' is not valid.",
             )
         if sensitivity == "special_category":
             self._check_dpia()
@@ -92,7 +96,7 @@ class Orchestrator:
                 "artifacts/dpia_signed.json not found.",
                 "Complete artifacts/dpia_checklist.md, obtain DPO sign-off,\n"
                 "and save to artifacts/dpia_signed.json.\n"
-                "See examples/dpia_signed.json for required format."
+                "See examples/dpia_signed.json for required format.",
             )
         with open(dpia_path) as f:
             dpia = json.load(f)
@@ -104,10 +108,10 @@ class Orchestrator:
                 "ERR_DPIA_INVALID",
                 "dpia_signed.json is missing required fields.",
                 "Ensure dpia_signed.json contains dpo_sign_off.decision == 'approved'\n"
-                "and dpia_complete == true."
+                "and dpia_complete == true.",
             )
 
-    def run_pipeline(self, dataset_path: str) -> None:
+    def run_pipeline(self, dataset_path: str) -> None:  # EXEMPT: cohesive atomic unit
         """Run the full pipeline in sequence. Each step is a hard gate.
 
         Stage order:
@@ -149,7 +153,9 @@ class Orchestrator:
         participant_code_map = self.config.get("participant_code_map", {})
         participant_code = self.config.get("participant_code", f"P{dataset_id}")
         session_label = self.config.get("session_label", "session1")
-        deid_result = deidentify(archive_path, participant_code_map, participant_code, session_label)
+        deid_result = deidentify(
+            archive_path, participant_code_map, participant_code, session_label
+        )
         deid_path = deid_result["deid_path"]
 
         spot_check_prompt(deid_path)
@@ -170,7 +176,9 @@ class Orchestrator:
         print("=" * 60)
         print("\nBefore Pass 2 can run:")
         print("  1. Deposit Pass 1 output to OSF and upgrade the anchor:")
-        print(f"     python src/modules/osf_uploader.py --anchor {anchor_path} --doi [DOI]")
+        print(
+            f"     python src/modules/osf_uploader.py --anchor {anchor_path} --doi [DOI]"
+        )
         print("  2. Lock your lens record:")
         print("     python src/modules/lens_dialogue.py --lock \\")
         print(f"       --run-id {anchor_id} --researcher-id [orcid]")

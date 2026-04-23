@@ -15,8 +15,8 @@
     "memory": {
       "type": "local",
       "command": [
-        "node",
-        "node_modules/@modelcontextprotocol/server-memory/dist/index.js"
+        "bash",
+        "scripts/start-mcp-memory.sh"
       ],
       "environment": {}
     }

@@ -1,6 +1,5 @@
 # Runtime — regenerated each session
 .ai-layer/retry-counts.json
-scripts/lint-check.sh
 
 # Secrets
 .ai-layer/.vault
@@ -12,6 +11,7 @@ scripts/lint-check.sh
 
 # Node
 node_modules/
+.opencode/package-lock.json
 
 # Python
 __pycache__/

@@ -7,6 +7,7 @@ anchor_type starts as "local" and MUST be upgraded to osf_doi before Pass 2 runs
 Exit codes: 0 success, 3 on sequencing/hash errors
 See docs/error_codes.md
 """
+
 import sys
 import json
 import hashlib
@@ -24,7 +25,7 @@ def _sha256_file(path: str) -> str:
     return h.hexdigest()
 
 
-def run_pass1(deid_path: str, config: dict) -> dict:
+def run_pass1(deid_path: str, config: dict) -> dict:  # EXEMPT: cohesive atomic unit
     """
     Runs blind analysis — NO researcher lens, NO theoretical framing in prompt.
     Calls local model at config['model']['api_base'] via POST /api/generate.
@@ -62,7 +63,9 @@ def run_pass1(deid_path: str, config: dict) -> dict:
     # ── Load de-identified data ────────────────────────────────────────────────
     with open(deid_path) as f:
         data_content = json.load(f)
-    user_prompt = f"Dataset strand: {strand}\n\nData:\n{json.dumps(data_content, indent=2)}"
+    user_prompt = (
+        f"Dataset strand: {strand}\n\nData:\n{json.dumps(data_content, indent=2)}"
+    )
 
     # ── Call local model ───────────────────────────────────────────────────────
     model_cfg = config.get("model", {})
@@ -85,13 +88,17 @@ def run_pass1(deid_path: str, config: dict) -> dict:
     output_path = f"artifacts/pass1_output_{dataset_id}.json"
     Path("artifacts").mkdir(exist_ok=True)
     with open(output_path, "w") as f:
-        json.dump({
-            "dataset_id": dataset_id,
-            "strand": strand,
-            "run_label": "pass1_blind",
-            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
-            "pass1_themes": pass1_themes,
-        }, f, indent=2)
+        json.dump(
+            {
+                "dataset_id": dataset_id,
+                "strand": strand,
+                "run_label": "pass1_blind",
+                "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                "pass1_themes": pass1_themes,
+            },
+            f,
+            indent=2,
+        )
 
     pass1_hash = _sha256_file(output_path)
     prereg_doi = config.get("pre_registration_doi")
@@ -114,7 +121,11 @@ def run_pass1(deid_path: str, config: dict) -> dict:
         json.dump(anchor, f, indent=2)
 
     prompt_osf_deposit(anchor_path)
-    return {"pass1_output_path": output_path, "pass1_hash": pass1_hash, "anchor_path": anchor_path}
+    return {
+        "pass1_output_path": output_path,
+        "pass1_hash": pass1_hash,
+        "anchor_path": anchor_path,
+    }
 
 
 def prompt_osf_deposit(anchor_path: str) -> None:
@@ -130,7 +141,15 @@ def prompt_osf_deposit(anchor_path: str) -> None:
     print("  1. Go to https://osf.io (or your institutional repository)")
     print("  2. Upload the pass1_output file listed in the anchor")
     print("  3. Copy the DOI or accession number")
-    print("  4. Run: python src/modules/osf_uploader.py --anchor", anchor_path, "--doi [DOI]")
-    print("\nThis upgrades anchor_type from 'local' to 'osf_doi' — required for Pass 2.")
-    print("\nPress Enter to acknowledge (you can complete deposit later before running Pass 2).")
+    print(
+        "  4. Run: python src/modules/osf_uploader.py --anchor",
+        anchor_path,
+        "--doi [DOI]",
+    )
+    print(
+        "\nThis upgrades anchor_type from 'local' to 'osf_doi' — required for Pass 2."
+    )
+    print(
+        "\nPress Enter to acknowledge (you can complete deposit later before running Pass 2)."
+    )
     input()

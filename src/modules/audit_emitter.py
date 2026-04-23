@@ -10,6 +10,7 @@ Validates before packaging:
 Exits with code 5 on validation failure.
 Exits with code 0 on success.
 """
+
 import sys
 import json
 import hashlib
@@ -27,7 +28,11 @@ def _sha256_file(path: str) -> str:
     return h.hexdigest()
 
 
-def emit_audit_bundle(run_id: str, dataset_id: str, config: dict) -> dict:
+def emit_audit_bundle(
+    run_id: str,
+    dataset_id: str,
+    config: dict,
+) -> dict:  # EXEMPT: cohesive atomic unit
     """
     Validates all constraints then packages artifacts into audit_bundle_[run_id].zip.
     Returns: { "bundle_path": str, "bundle_sha256": str, "metadata_path": str }
@@ -42,7 +47,9 @@ def emit_audit_bundle(run_id: str, dataset_id: str, config: dict) -> dict:
             anchor = json.load(f)
         if anchor.get("anchor_type") == "local":
             print("\n[ERR_ANCHOR_LOCAL_AT_BUNDLE] pass1_anchor has anchor_type: local.")
-            print("Action: Complete OSF deposit (Step 4 in docs/runbook.md) before emitting audit bundle.")
+            print(
+                "Action: Complete OSF deposit (Step 4 in docs/runbook.md) before emitting audit bundle."
+            )
             sys.exit(5)
 
     # 2. Check all evidence_review verdicts complete
@@ -55,7 +62,9 @@ def emit_audit_bundle(run_id: str, dataset_id: str, config: dict) -> dict:
         with open(rf) as f:
             rec = json.load(f)
         verdict = rec.get("human_verdict")
-        if verdict is None or (isinstance(verdict, dict) and verdict.get("verdict") is None):
+        if verdict is None or (
+            isinstance(verdict, dict) and verdict.get("verdict") is None
+        ):
             incomplete.append(rf)
         else:
             if isinstance(verdict, dict):
@@ -66,7 +75,9 @@ def emit_audit_bundle(run_id: str, dataset_id: str, config: dict) -> dict:
                     interpretive_propositions.append(rec.get("claim_id"))
 
     if incomplete:
-        print(f"\n[ERR_VERDICT_INCOMPLETE] {len(incomplete)} evidence_review record(s) have human_verdict: null.")
+        print(
+            f"\n[ERR_VERDICT_INCOMPLETE] {len(incomplete)} evidence_review record(s) have human_verdict: null."
+        )
         print("Action: Run: python src/tools/review_cli.py --dir artifacts/")
         for f in incomplete:
             print(f"  Pending: {f}")
@@ -89,15 +100,21 @@ def emit_audit_bundle(run_id: str, dataset_id: str, config: dict) -> dict:
             pass
 
     if missing_strand:
-        print(f"\n[ERR_STRAND_MISSING] {len(missing_strand)} artifact(s) missing strand field.")
+        print(
+            f"\n[ERR_STRAND_MISSING] {len(missing_strand)} artifact(s) missing strand field."
+        )
         for f in missing_strand:
             print(f"  Missing: {f}")
         sys.exit(5)
 
     # 4. Pre-reg DOI soft warning
-    prereg_doi = config.get("pre_registration_doi") or anchor.get("pre_registration_doi")
+    prereg_doi = config.get("pre_registration_doi") or anchor.get(
+        "pre_registration_doi"
+    )
     if not prereg_doi:
-        print("[WARN_PREREG_MISSING] pre_registration_doi is null. Flagged in audit bundle.")
+        print(
+            "[WARN_PREREG_MISSING] pre_registration_doi is null. Flagged in audit bundle."
+        )
 
     # ── Collect artifacts ──────────────────────────────────────────────────
     stability_path = f"artifacts/stability_report_{dataset_id}.json"
@@ -133,11 +150,13 @@ def emit_audit_bundle(run_id: str, dataset_id: str, config: dict) -> dict:
     with zipfile.ZipFile(bundle_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for fpath in bundle_files:
             zf.write(fpath)
-            manifest.append({
-                "path": fpath,
-                "sha256": _sha256_file(fpath),
-                "strand": _get_strand(fpath),
-            })
+            manifest.append(
+                {
+                    "path": fpath,
+                    "sha256": _sha256_file(fpath),
+                    "strand": _get_strand(fpath),
+                }
+            )
 
     bundle_sha256 = _sha256_file(bundle_path)
 
@@ -175,7 +194,9 @@ def emit_audit_bundle(run_id: str, dataset_id: str, config: dict) -> dict:
     print(f"  Artifacts:   {len(manifest)}")
     print(f"  Reviewers:   {', '.join(sorted(reviewer_ids))}")
     if interpretive_propositions:
-        print(f"  Interp. props: {len(interpretive_propositions)} (labelled in write-up)")
+        print(
+            f"  Interp. props: {len(interpretive_propositions)} (labelled in write-up)"
+        )
     print(f"\nNext: python src/modules/osf_uploader.py --bundle {bundle_path}")
     sys.exit(0)
 

@@ -11,3 +11,4 @@ Before implementing, run these checks in order:
   If not: tell human to run /plan first and stop.
 
 If all checks clear: invoke the executor to implement .ai-layer/current-plan.md.
+If this command flow edits governed files directly, end with a clean git commit before exit.

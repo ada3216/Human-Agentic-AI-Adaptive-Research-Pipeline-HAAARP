@@ -165,6 +165,7 @@ If the answer creates a binding architectural constraint, write to MCP memory:
     - chosen: answer
     - date: ISO date
     - project: project_name from PROJECT_CONFIG.md
+If the planner edits governed files directly, end with a clean git commit before returning control.
 .ai-layer/current-plan.md schema — produce this exact structure:
 Plan: task name
 Scope: CONTAINED | STRUCTURAL

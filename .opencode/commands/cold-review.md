@@ -19,3 +19,4 @@ Rate on four dimensions:
 
 List specific findings under each dimension. FAIL items first, then WEAK, then ADVISORY.
 End with: OVERALL: [PASS | ADVISORY | FAIL] — one sentence.
+If you edited governed files while preparing the review, end with a clean git commit before exit.

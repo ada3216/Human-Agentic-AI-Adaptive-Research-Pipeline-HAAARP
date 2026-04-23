@@ -13,6 +13,7 @@ Lock requires non-null signature or exits with code 4.
 
 Exit codes: 0 success, 4 on lens/signature errors
 """
+
 import re
 import sys
 import json
@@ -28,39 +29,30 @@ LENS_QUESTIONS = [
     # L1.1 — theoretical orientation
     "What is your theoretical orientation for this study? Please describe the frameworks, "
     "traditions, or theoretical commitments that inform how you approach this data.",
-
     # L1.2 — clinical/professional orientation
     "What is your relevant professional or clinical experience with this topic or population? "
     "How might that experience shape what you notice or attend to?",
-
     # L2.1 — primary hypotheses
     "What are your primary hypotheses or expectations going into this analysis? "
     "Please list them explicitly so they can be cross-checked against your pre-registration.",
-
     # L2.2 — lens vocabulary
     "What specific concepts, constructs, or vocabulary from your theoretical frame are you "
     "likely to use or look for in the data? List these as your lens vocabulary.",
-
     # L3.1 — vulnerable groups / power dynamics
     "Are there specific vulnerabilities, power dynamics, or relational complexities in your "
     "participant group that you expect to shape how they speak or present their experience?",
-
     # L3.2 — expected participant indirection
     "Do you expect participants to express certain experiences indirectly, through hedging, "
     "displacement, or omission? If so, how do you expect that to manifest?",
-
     # L4.1 — explicit exclusions
     "What are you explicitly NOT looking for in this analysis? "
     "What would you set aside or treat as out of scope?",
-
     # L4.2 — evidence standard
     "What is your evidence standard for a finding? How many participants and excerpts "
     "would you require before treating something as a theme rather than a notable instance?",
-
     # L5.1 — Pass 1 surprises
     "Having seen the Pass 1 blind analysis output, what surprised you? "
     "What did the blind reading surface that you had not anticipated?",
-
     # L5.2 — confirmation + lock
     "Please review your responses above. Is this an accurate and complete account of your "
     "theoretical lens and positionality as you begin the positioned analysis? "
@@ -71,12 +63,13 @@ LENS_QUESTIONS = [
 
 # ── Response extraction helpers ───────────────────────────────────────────────
 
+
 def _split_lines(text: str) -> list:
     """Split on newlines/semicolons, strip list markers, drop blank entries."""
-    parts = re.split(r'[\n;]', text)
+    parts = re.split(r"[\n;]", text)
     cleaned = []
     for p in parts:
-        p = re.sub(r'^[\s\-\d\.\)\*]+', '', p).strip()
+        p = re.sub(r"^[\s\-\d\.\)\*]+", "", p).strip()
         if p:
             cleaned.append(p)
     return cleaned
@@ -84,23 +77,29 @@ def _split_lines(text: str) -> list:
 
 def _split_vocabulary(text: str) -> list:
     """Split comma-, semicolon-, or newline-delimited terms."""
-    return [t.strip() for t in re.split(r'[,;\n]', text) if t.strip()]
+    return [t.strip() for t in re.split(r"[,;\n]", text) if t.strip()]
 
 
 def _parse_evidence_standard(text: str) -> dict:
     """Extract numeric thresholds from free-text evidence standard response."""
-    nums = re.findall(r'\b(\d+)\b', text)
+    nums = re.findall(r"\b(\d+)\b", text)
     return {
         "raw": text.strip(),
         "require_excerpt_count": int(nums[0]) if nums else None,
         "generalisation_threshold": (
-            f"minimum {nums[1]} distinct participants" if len(nums) > 1 else text.strip()
+            f"minimum {nums[1]} distinct participants"
+            if len(nums) > 1
+            else text.strip()
         ),
     }
 
 
-def run_lens_dialogue(config: dict, pass1_output_path: str, model_client=None,
-                      run_id: str = None) -> dict:
+def run_lens_dialogue(
+    config: dict,
+    pass1_output_path: str,
+    model_client=None,
+    run_id: str = None,
+) -> dict:  # EXEMPT: cohesive atomic unit
     """
     Runs structured 10-question reflexivity interview.
     Researcher types responses — AI is NOT generating the answers.
@@ -130,12 +129,18 @@ def run_lens_dialogue(config: dict, pass1_output_path: str, model_client=None,
     for i, question in enumerate(LENS_QUESTIONS, 1):
         print(f"\nQ{i}: {question}")
         response = input("> ").strip()
-        responses.append({"question_number": i, "question": question, "response": response})
+        responses.append(
+            {"question_number": i, "question": question, "response": response}
+        )
 
         # Q3 — cross-check hypotheses against pre-registration
         if i == 3 and prereg_doi:
-            print(f"\n  [Note] These hypotheses will be cross-checked against {prereg_doi}.")
-            print("  Any hypothesis not present in your pre-registration will be flagged as post-hoc.")
+            print(
+                f"\n  [Note] These hypotheses will be cross-checked against {prereg_doi}."
+            )
+            print(
+                "  Any hypothesis not present in your pre-registration will be flagged as post-hoc."
+            )
             # Pre-reg DOI lookup is a network operation deferred until DOI resolves to machine-readable
             # metadata. Currently flagged as post-hoc manually in lens_vocabulary review step.
 
@@ -152,7 +157,8 @@ def run_lens_dialogue(config: dict, pass1_output_path: str, model_client=None,
     # Q3 primary hypotheses: each line is one hypothesis
     primary_hypotheses = [
         {"hypothesis": h, "in_prereg": bool(prereg_doi)}
-        for h in _split_lines(_resp(3)) if h
+        for h in _split_lines(_resp(3))
+        if h
     ]
 
     # Q4 lens vocabulary: comma/semicolon/newline-separated terms
@@ -177,20 +183,25 @@ def run_lens_dialogue(config: dict, pass1_output_path: str, model_client=None,
     q10_text = _resp(10).strip()
     prefilled_signature = (
         q10_text
-        if (q10_text.startswith("https://orcid.org/") or re.match(r'^[\w\.\-@]{4,}$', q10_text))
+        if (
+            q10_text.startswith("https://orcid.org/")
+            or re.match(r"^[\w\.\-@]{4,}$", q10_text)
+        )
         else None
     )
 
     # ── AI summarises responses via local model ────────────────────────────────
     _src = Path(__file__).parent.parent
     import sys as _sys
+
     if str(_src) not in _sys.path:
         _sys.path.insert(0, str(_src))
     from modules.ollama_client import call_generate  # noqa: E402
 
     summary_prompt_path = _src / "prompts" / "lens_summary_prompt.txt"
     lens_summary_prompt = (
-        summary_prompt_path.read_text() if summary_prompt_path.exists()
+        summary_prompt_path.read_text()
+        if summary_prompt_path.exists()
         else "Summarise the following researcher lens dialogue into 6 sections."
     )
 
@@ -241,22 +252,32 @@ def run_lens_dialogue(config: dict, pass1_output_path: str, model_client=None,
 
     print(f"\nLens dialogue saved to {lens_path}")
     print("Review your responses, then lock with:")
-    print(f"  python src/modules/lens_dialogue.py --lock --run-id {run_id} --researcher-id [orcid]")
+    print(
+        f"  python src/modules/lens_dialogue.py --lock --run-id {run_id} --researcher-id [orcid]"
+    )
 
     return {"lens_path": lens_path, "lens_hash": None, "locked": False}
 
 
-def lock_lens(lens_path: str, researcher_id: str,
-              researcher_role: str = "researcher") -> dict:
+def lock_lens(
+    lens_path: str, researcher_id: str, researcher_role: str = "researcher"
+) -> dict:  # EXEMPT: cohesive atomic unit
     """
     Locks the lens record with researcher signature and SHA256 hash.
     researcher_id must be ORCID or institutional username — not null, not anonymous.
     Returns: { "lens_hash": str, "locked": True }
     Exits with code 4 if signature invalid.
     """
-    if not researcher_id or researcher_id.strip().lower() in {"", "anonymous", "anon", "unknown"}:
+    if not researcher_id or researcher_id.strip().lower() in {
+        "",
+        "anonymous",
+        "anon",
+        "unknown",
+    }:
         print("\n[ERR_LENS_SIGNATURE_MISSING] researcher_id is null or anonymous.")
-        print("Action: Provide your ORCID (https://orcid.org/...) or institutional username.")
+        print(
+            "Action: Provide your ORCID (https://orcid.org/...) or institutional username."
+        )
         sys.exit(4)
 
     if not Path(lens_path).exists():

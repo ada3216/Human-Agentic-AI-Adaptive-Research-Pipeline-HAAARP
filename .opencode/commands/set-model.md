@@ -19,3 +19,4 @@ If no argument:
 
 If role is invalid:
   List valid roles and their current values.
+If this command edits governed files directly, end with a clean git commit before exit.

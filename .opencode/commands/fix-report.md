@@ -14,3 +14,4 @@ CONFIRM BEFORE FIXING:
 RISK: [LOW | MEDIUM | HIGH] — risk of fix causing unintended side effects
 
 End with: Run /plan "[brief fix description]" to implement this fix.
+If you edited governed files while preparing the report, end with a clean git commit before exit.
