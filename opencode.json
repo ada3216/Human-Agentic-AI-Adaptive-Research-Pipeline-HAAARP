@@ -3,7 +3,7 @@
   "instructions": [
     ".ai-layer/PROJECT_CONFIG.md"
   ],
-  "default_agent": "mag-student",
+  "default_agent": "mag-business",
   "plugin": [
     "./.opencode/plugins/gatekeeper.js"
   ],

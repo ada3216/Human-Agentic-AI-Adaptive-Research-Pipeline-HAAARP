@@ -114,6 +114,21 @@ On FAIL:
 1. `bash scripts/state.sh set pending_review false`
 2. Append: `DATE: [today] | REVIEW_FAIL | [task name] | [N] items | slot [slot]`
 
+## Commit sequence — when reviewer edits governed files
+
+When the reviewer applies fixes to governed project files (e.g., /review-plan minor corrections, or any path where the reviewer edits files directly), run this commit sequence before continuing:
+1. `git add -A`
+2. `bash scripts/check.sh`
+3. `git commit -m "[type]([scope]): [description]"` — conventional commit:
+   - Type: `feat | fix | refactor | docs | chore`
+   - Scope: short module/area name
+   - Description: present tense, under 72 chars
+4. If `git status --porcelain` is non-empty after commit, surface:
+   ```
+   RESIDUAL UNCOMMITTED FILES:
+   [porcelain output]
+   ```
+
 If this is the third consecutive REVIEW_FAIL on the same `current_task` (detect by reading decisions.md for three consecutive `REVIEW_FAIL` entries with the same task name and no intervening `REVIEW_PASS`):
 - Surface ESCALATION block (see ESCALATION format in workflow/SKILL.md)
 - Append: `DATE: [today] | ESCALATION | review-fail: [task name] | 3 consecutive fails | human required`

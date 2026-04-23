@@ -12,6 +12,19 @@ Read three sources and nothing else. Output one block and stop.
 3. MCP query: `mcp_memory_search_nodes` with query `"last_task architectural_decision constraint"`
 4. Apply provenance filter: only trust memory entries containing the current `project_name` (from `PROJECT_CONFIG.md`) as an observation.
 
+Memory provenance filter (applies to all returned nodes):
+- If a node has no "project:" observation: log to session-toollog.md:
+  "MEMORY_IGNORED | [node-name] | reason: no project field" — do not surface.
+- If a node's "project:" value does not match the current project name
+  (from PROJECT_CONFIG.md): log "MEMORY_IGNORED | [node-name] | reason: project mismatch"
+  — do not surface.
+- If a node has no "date:" observation and entity type is architectural_decision
+  or constraint: log "MEMORY_IGNORED | [node-name] | reason: no date field" — do not surface.
+- If a node's "date:" is more than 90 days ago: surface it with a prefix note:
+  "⚠️ Stale constraint (date: [date]) — verify still applies before acting on it."
+
+This filter applies to all memory reads in normal operation.
+
 ## Output — produce this block exactly
 
 Fill in all bracketed values from the sources above:

@@ -3,7 +3,8 @@
 ## The informed-yolo cycle
 
 ```
-/plan [brief]       DESIGN_STOP(s) if needed        current-plan.md
+/plan [brief]       DESIGN_STOP(s) if needed        current-plan.md        PLAN_REVIEW_GATE
+/review-plan        (on different AI provider)       PLAN_REVIEW_OUTCOME: APPROVED or MAJOR_ISSUES
 /implement          Gate 1 lint feedback             retry-budget if needed        REVIEW_STOP
 /review             (on different AI provider)       REVIEW OUTCOME: PASS or FAIL
 /plan [next phase]  repeat
@@ -52,6 +53,25 @@ State on PASS:   pending_review=false
 Log on PASS:     DATE: [today] | REVIEW_PASS | [task name] | slot [slot]
 Log on FAIL:     DATE: [today] | REVIEW_FAIL | [task name] | [N] items | slot [slot]
 
+## PLAN_REVIEW_GATE format and state transitions
+
+Format (from mag.md):
+```
+PLAN_REVIEW_GATE
+Plan produced: [current_task]
+
+Next steps:
+1. Open a new session with a DIFFERENT AI provider (strong default)
+2. Run: /review-plan
+3. APPROVED or APPROVED_WITH_MINOR_FIXES → run /implement in same session
+4. MAJOR_ISSUES → return to original provider and /plan, or proceed anyway
+```
+
+State on fire:     plan_review_pending=true (set by planner after producing current-plan.md)
+State on APPROVED: plan_review_pending=false
+Log on APPROVED:   DATE: [today] | PLAN_REVIEW_PASS | [task name] | [summary]
+Log on MAJOR:      DATE: [today] | PLAN_REVIEW_FAIL | [task name] | [N] major issues
+
 ## state.json field reference
 
 | Field | Type | Meaning |
@@ -65,6 +85,7 @@ Log on FAIL:     DATE: [today] | REVIEW_FAIL | [task name] | [N] items | slot [s
 | last_completed_phase | string/null | Last task the executor finished implementing (set at implement_complete, before review) |
 | design_stop_pending | bool | true: question awaiting human answer |
 | design_stop_question | string/null | The pending question text |
+| plan_review_pending | bool | true: plan review gate active; /implement blocked until /review-plan clears it |
 
 All reads and writes: `bash scripts/state.sh [get|set|show]`
 
@@ -82,6 +103,9 @@ DATE: [ISO date] | [TYPE] | [content]
 | IMPLEMENT | Phase implementation complete |
 | REVIEW_PASS | Reviewer approved |
 | REVIEW_FAIL | Reviewer found issues |
+| PLAN_REVIEW_PASS | Plan review approved (clean or with minor fixes) |
+| PLAN_REVIEW_FAIL | Plan review found major issues |
+| PLAN_REVIEW_OVERRIDE | Human chose to proceed despite major plan issues |
 | PLAIN_SUMMARY | Reviewer appends after every REVIEW_PASS — non-technical summary of what was built |
 | ESCALATION | Retry budget exhausted |
 | AUTO_RESET | Stale phase cleared at session start |
@@ -128,8 +152,13 @@ No other writes to MCP memory under any circumstances. After `/project-init` has
 
 ## The rule about stop types
 
-If a situation seems to require a third stop type: it does not.
-Use DESIGN_STOP (design decision), REVIEW_STOP (phase complete), or ESCALATION (budget exhausted).
+Two stop types: DESIGN_STOP (design decision) and REVIEW_STOP (phase complete).
+One plan review gate: PLAN_REVIEW_GATE (plan produced, awaiting cross-provider review before /implement).
+PLAN_REVIEW_GATE is not a stop type — it is a routing gate that blocks /implement until
+the plan has been reviewed on a different provider via /review-plan. It uses a boolean
+flag (plan_review_pending) rather than a new phase value.
+ESCALATION is not a stop type — it is a budget-exhaustion report.
+Use DESIGN_STOP, REVIEW_STOP, PLAN_REVIEW_GATE, or ESCALATION.
 A new stop type requires a new version of this specification.
 
 ## Full command list
@@ -139,7 +168,8 @@ A new stop type requires a new version of this specification.
 | /plan | planner | Produce current-plan.md, fire DESIGN_STOPs |
 | /implement | executor | Implement current-plan.md |
 | /review | reviewer | Review on different provider |
-| /commit | executor | check.sh + git commit |
+| /review-plan | reviewer | Plan review on different provider (before /implement) |
+| /commit | executor | Manual escape hatch: check.sh + git commit |
 | /prime | executor | PRIME CONTEXT block |
 | /probe | executor | Detect verbosity, write compensating constraints |
 | /project-init | planner | Set up project, configure lint rules |

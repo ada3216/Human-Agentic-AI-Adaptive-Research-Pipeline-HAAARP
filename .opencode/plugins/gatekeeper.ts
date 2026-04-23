@@ -4,7 +4,8 @@
 // Stateless. No per-file permissions. No hash-gate logic.
 
 import { execSync } from "child_process";
-import { existsSync } from "fs";
+import { existsSync, readFileSync, readdirSync, appendFileSync } from "fs";
+import { join, basename } from "path";
 
 function run(cmd: string): { ok: boolean; output: string } {
   try {
@@ -30,6 +31,92 @@ function extractPath(input: Record<string, unknown>): string | null {
     if (typeof input[key] === "string") return input[key] as string;
   }
   return null;
+}
+
+/**
+ * Look up .rules.md files in tier-1/ that match failing rule names.
+ * Returns formatted guidance string. Best-effort — never errors.
+ */
+function lookupRuleGuidance(lintOutput: string): string {
+  const rulesDir = ".ai-layer/lint-rules/tier-1";
+  if (!existsSync(rulesDir)) return "";
+
+  let ruleFiles: string[];
+  try {
+    ruleFiles = readdirSync(rulesDir).filter((f) => f.endsWith(".rules.md"));
+  } catch {
+    return "";
+  }
+
+  if (ruleFiles.length === 0) return "";
+
+  const blocks: string[] = [];
+  for (const rf of ruleFiles) {
+    const ruleName = rf.replace(/\.rules\.md$/, "");
+    // Check if this rule name or its descriptor appears in lint output
+    if (!lintOutput.includes(ruleName) && !lintOutput.toLowerCase().includes(ruleName.toLowerCase())) continue;
+    try {
+      const content = readFileSync(join(rulesDir, rf), "utf8");
+      const appliesTo = content.match(/\*\*Applies to:\*\*\s*(.*)/)?.[1] ?? "";
+      const example = content.match(/\*\*Example:\*\*\s*([\s\S]*?)(?=\*\*Rationale:|\n##|$)/)?.[1]?.trim() ?? "";
+      const rationale = content.match(/\*\*Rationale:\*\*\s*(.*)/)?.[1] ?? "";
+      blocks.push(
+        `Rule: ${ruleName}\n` +
+        `Applies to: ${appliesTo}\n` +
+        `Correct pattern: ${example}\n` +
+        `Rationale: ${rationale}`
+      );
+    } catch {
+      // Best-effort — skip unreadable files
+    }
+  }
+  return blocks.length > 0 ? "\n--- rule guidance ---\n" + blocks.join("\n\n") : "";
+}
+
+/**
+ * Extract failing rule IDs from lint output. Best-effort heuristic.
+ */
+function extractFailingRules(lintOutput: string): string[] {
+  const rules = new Set<string>();
+  // ESLint format: rule-name (at end of line)
+  for (const m of lintOutput.matchAll(/\b([\w-]+\/[\w-]+|[\w-]+)\s*$/gm)) {
+    if (m[1] && m[1].length > 2 && !/^\d+$/.test(m[1])) rules.add(m[1]);
+  }
+  // Ruff format: E123, W456, etc.
+  for (const m of lintOutput.matchAll(/\b([A-Z]\d{3,4})\b/g)) {
+    rules.add(m[1]);
+  }
+  return Array.from(rules);
+}
+
+/**
+ * Append one line to lint-failures.log. Dedup: skip if same rule+file
+ * combination already logged on the same calendar day.
+ */
+function logLintFailure(filePath: string, ruleIds: string[], sessionId: string): void {
+  const logPath = ".ai-layer/lint-rules/lint-failures.log";
+  if (!existsSync(".ai-layer/lint-rules")) return;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const rulesStr = ruleIds.join(",") || "unknown";
+  const line = `${today} | ${filePath} | ${rulesStr} | ${sessionId}`;
+
+  // Dedup check: read existing log and check for same date+file+rules
+  if (existsSync(logPath)) {
+    try {
+      const existing = readFileSync(logPath, "utf8");
+      const dedupKey = `${today} | ${filePath} | ${rulesStr}`;
+      if (existing.includes(dedupKey)) return;
+    } catch {
+      // If we can't read, proceed to append
+    }
+  }
+
+  try {
+    appendFileSync(logPath, line + "\n");
+  } catch {
+    // Passive — never block on log failure
+  }
 }
 
 type ToolBeforeInput = { tool: string; sessionID: string; callID: string };
@@ -73,9 +160,24 @@ export default async function (_ctx: unknown): Promise<{
       const result = run("bash scripts/lint-check.sh");
       if (!result.ok) {
         const label = filePath ?? "(path not extracted - patch-based write)";
-        console.log(`\nGATE-1 ADVISORY: lint failed after writing ${label}`);
+
+        // Structured advisory output
+        console.log(`\nGATE-1 ADVISORY: lint failed — ${label}`);
+        console.log("\n--- lint output ---");
         console.log(result.output);
-        console.log("Resolve lint violations before committing.");
+
+        // Rule guidance from .rules.md files
+        const guidance = lookupRuleGuidance(result.output);
+        if (guidance) {
+          console.log(guidance);
+        }
+
+        console.log("\nSelf-correction: resolve each failure before the next write.");
+        console.log("Retry budget: call scripts/retry-budget.sh before re-attempting.");
+
+        // Passive failure log
+        const ruleIds = extractFailingRules(result.output);
+        logLintFailure(label, ruleIds, input.sessionID ?? "unknown");
       }
     },
   };

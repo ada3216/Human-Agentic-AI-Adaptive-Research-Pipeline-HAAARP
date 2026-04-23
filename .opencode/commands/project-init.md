@@ -57,7 +57,7 @@ Success test:
    - Extract: what the PRODUCT is, who uses it, how it runs, and project maturity.
    c. PLANS / SPECS / PROPOSALS
    - Search for and read files matching:
-     `*devplan*`, `*dev-plan*`, `*plan*`, `*prd*`, `*spec*`, `*requirements*`,
+     `*devplan*`, `*dev-plan*`, `implentation-docs/magentica-2-devplan-v5.md`, `*plan*`, `*prd*`, `*spec*`, `*requirements*`,
      `*roadmap*`, `*architecture*`, `*design*`, `*implementation*`,
      `*proposal*`, `*protocol*`, `*methods*`, `*ethics*`, `*study*`, `*grant*`.
    - Include readable PDF/DOCX/HTML exports if that is where the planning docs live.
@@ -144,6 +144,7 @@ Success test:
 5. For PROPOSAL MODE or BOOTSTRAP MODE, run a bootstrap interview before drafting.
    Interview rules:
    - Use plain language.
+   - Explain implementation consequences/tradeoffs.
    - One concept per question.
    - Accept rough answers.
    - Offer `I don't know — recommend one` where useful.
@@ -164,7 +165,7 @@ Success test:
    For every field you plan to write, keep:
    - field name
    - proposed value
-   - source file(s)
+   - source file(s) (repo-specific evidence with concrete file/section basis)
    - confidence: high | medium | low
    Rules:
    - Do not write unsupported claims.
@@ -305,11 +306,46 @@ Artifact conventions
    data_sensitivity
    - Use the strongest evidence available: guardrails/spec/config/schema/example > keywords.
    - If sensitive, also infer legal_framework and data_egress_policy.
-10. Prepare lint rules.
-   For each governed language, prepare:
-   - 1 module/file-size rule aligned with max_file_lines
-   - 1 pattern rule grounded in actual repo conventions
-   Do not create rules for FRAMEWORK-only languages.
+10. Generate lint rules using the 7-category framework.
+
+    For each governed language, attempt to generate one rule per applicable
+    category. Apply this in order:
+
+    boundaries:    for each non-negotiable pattern, prohibited integration,
+                   and hard gate condition in ARCHITECTURE.md that is
+                   statically checkable — generate one rule
+    safety:        required if data_sensitivity=sensitive; also generate
+                   for any secret-handling or egress constraint found
+    grep-ability:  read actual source files and identify dominant naming,
+                   export, and import conventions — generate one rule
+                   encoding the correct pattern
+    glob-ability:  identify file placement conventions in source — generate
+                   one rule if a clear pattern exists
+    testability:   only if test files exist in the repo; enforce co-location
+                   or async pattern found in existing tests
+    observability: only if a logging pattern is identifiable in source;
+                   encode the correct structured logging form
+    docs:          only if a public API layer is identifiable; require
+                   docstrings at that surface
+    size:          1 rule per language, values from PROJECT_CONFIG.md
+                   (max_file_lines, max_function_lines) — do not hardcode
+
+    Do not generate a category rule if there is no evidence for it.
+    Do not exceed 15 active rules per governed language.
+    Do not generate rules for FRAMEWORK-only languages.
+
+    Each rule requires two files:
+      <language>-<category>-<descriptor>.<tool>.toml|json
+        — valid executable tool configuration (not comments only)
+      <language>-<category>-<descriptor>.rules.md
+        — structured per P7-3 (Applies to / Rule / Example / Rationale):
+          **Applies to:** [file types, contexts]
+          **Rule:** [what to do — not just what to avoid]
+          **Example:** [correct pattern in code]
+          **Rationale:** [ARCHITECTURE.md section or Factory category reference]
+
+    Note: scripts/lint-check.sh is a static file — do not regenerate it.
+    Generate rules only.
 11. Run self-check before presenting anything.
    Boundary check
    - Does governed_languages include FRAMEWORK-only languages?
@@ -362,11 +398,12 @@ Artifact conventions
    Then show:
    - full drafted PROJECT_CONFIG.md
    - full drafted ARCHITECTURE.md
-13. If genuine gaps remain, emit one DESIGN_STOP block with all questions numbered
+13. If genuine gaps remain, emit one combined DESIGN_STOP block with numbered items
     for one reply.
    Rules:
-   - Ask only about unresolved items that materially change implementation behavior.
+   - Ask only genuine unresolved gaps and unresolved items that materially change implementation behavior.
    - Use plain language.
+   - Explain implementation consequences/tradeoffs.
    - Explain why each answer matters.
    - Offer repo-grounded options where sensible.
    - Label the recommended option (Recommended).
@@ -403,3 +440,81 @@ Artifact conventions
    "permission": { "edit": "ask", "bash": "ask" }
 19. Append to .ai-layer/decisions.md:
    DATE: today | INIT | project: name | languages: list | data_sensitivity: value | rules confirmed: N
+   Type:
+     yes     — accept all defaults and proceed
+     refine  — adjust specific items before proceeding
+   ```
+
+   If "yes": skip to step 4 with the inferred values.
+   If "refine": ask one DESIGN_STOP per item the human flags to change:
+     - Project name and description
+     - Data type (4 options)
+     - Each lint rule: "Keep this rule? (yes / no / change threshold)"
+   Only fire DESIGN_STOPs for items explicitly flagged for refinement.
+
+4. Ask three DESIGN_STOPs in order — these answers cannot be inferred from the workspace and each is a separate decision (one stop per decision, per planner.md convention):
+
+   DESIGN_STOP: "Describe the core architectural pattern of this project in one plain sentence.
+                  Example: 'All data access goes through src/repository — never direct DB calls.'
+                  Example: 'All sensitive data transformations happen inside Docker — never on the host.'
+                  This becomes a constraint the reviewer checks on every review."
+
+   DESIGN_STOP: "In one paragraph: what problem does this project solve, for whom, and what does
+                  success look like? This is the north star the agent uses for judgment calls."
+
+   DESIGN_STOP: "How does sensitive data flow through this project? For each type of sensitive
+                  data, describe: where it enters, how it is processed or stored, and when/how
+                  it is deleted or exported. Example: 'Health records: uploaded via web form →
+                  processed inside Docker → stored encrypted → deleted after 30 days'.
+                  Write 'none' if this project has no sensitive data."
+
+5. For each confirmed lint rule:
+   - Write the rule file to .ai-layer/lint-rules/tier-1/
+   - Write a matching .rules.md explaining why this rule exists
+   - Write to MCP memory: mcp_memory_create_entities with name matching the rule,
+     entityType "constraint", observations ["rule: [description]", "project: [name]"]
+
+6. Update .ai-layer/PROJECT_CONFIG.md:
+   project_name: [from refinement answer if provided, else "unset"]
+   project_description: [from refinement answer if provided, else "unset"]
+   project_type: [from inferred or refined value]
+   governed_languages: [from project-init.sh output]
+
+6b. Write data_sensitivity field:
+    Write to PROJECT_CONFIG.md ## Project Context:
+      data_sensitivity: [sensitive | standard]
+      sensitivity_reason: [the inferred or confirmed reason, one phrase]
+    If sensitive: surface one-line note:
+      "Sensitive project profile active: full-yolo disabled, gitleaks required,
+       outbound network denied by default, memory provenance enforced."
+    If sensitive: write to ARCHITECTURE.md ## Non-negotiable constraints:
+      data_sensitivity: sensitive
+      sensitivity_enforcement: full-yolo disabled; review required for all code changes;
+        gitleaks required; outbound network denied by default; memory provenance enforced
+    Note: do NOT log a decisions.md entry here. data_sensitivity is folded into
+    the step 9 INIT entry to avoid two INIT entries on the same run.
+
+7. Update docker/Dockerfile FROM line:
+   Python primary  → python:3.12-slim
+   Node/TS primary → node:20-slim
+   Mixed           → python:3.12-slim  (human can override)
+
+7b. Write the `permission` block to `opencode.json` for sensitive projects.
+
+8. Populate `.ai-layer/ARCHITECTURE.md` from the answers in step 4:
+   - project_summary: from project name/description (or "unset" if not refined)
+   - patterns: at least one entry from the architectural pattern DESIGN_STOP answer
+   - constraints: at least one entry from confirmed lint rules
+   - north_star: from the paragraph DESIGN_STOP answer
+   - data_flow: from the data flow DESIGN_STOP answer (this becomes an auditable commitment)
+
+9. Append to decisions.md:
+   DATE: [today] | INIT | project: [name] | languages: [list] | rules confirmed: [N] | data_sensitivity: [value]
+20. Commit all written files (mandatory final step):
+   - `git add -A`
+   - `bash scripts/check.sh`
+   - `git commit -m "chore(init): project-init setup for [project_name]"`
+     - Conventional commit: type(scope): description, present tense, under 72 chars
+   - If `git status --porcelain` is non-empty after commit, surface residual files.
+   - Rationale: project-init writes governed files that must be committed before any
+     subsequent /plan or /implement can operate on a clean baseline.

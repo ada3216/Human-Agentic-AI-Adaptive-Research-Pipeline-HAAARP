@@ -108,7 +108,7 @@ FREE-FORM PLANNING — steps for normal task briefs only:
    - Do not fire a stop for things already decided by architecture, policy,
      guardrails, or direct repo evidence.
    - Default: one DESIGN_STOP per decision.
-   - `/project-init` exception: batch unresolved setup questions into one numbered block.
+   - `/project-init` exception: batch unresolved setup questions into one numbered block; batch them into one DESIGN_STOP block.
 9. Produce `.ai-layer/current-plan.md`.
    Every implementation step must be checked against the relevant envelope.
    PRODUCT tasks:
@@ -126,7 +126,8 @@ FREE-FORM PLANNING — steps for normal task briefs only:
    - rewrite the step, or
    - fire DESIGN_STOP if the constraint itself would need to change
 10. Exit planning state.
-   - Run: `bash scripts/state.sh set phase idle`
+    - Run: `bash scripts/state.sh set phase idle`
+    - Run: `bash scripts/state.sh set plan_review_pending true`
 11. Append to `decisions.md`:
    `DATE: [today] | PLAN | [task name] | scope: [CONTAINED|STRUCTURAL] | risk: [LOW|MEDIUM|HIGH]`
 DESIGN_STOP format — use this exact structure for normal planning:
@@ -201,6 +202,7 @@ Omit if none.
 Required NEXT STEP footer:
 ─────────────────────────────────────────
 NEXT STEP
-Command:  /implement
-Action:   Review the plan above. Run /implement to proceed.
+Command:  /review-plan
+Model:    Switch to a DIFFERENT AI provider before running /review-plan
+Action:   Open a new session on a different provider, then run /review-plan
 ─────────────────────────────────────────
