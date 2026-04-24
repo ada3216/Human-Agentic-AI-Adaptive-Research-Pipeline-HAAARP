@@ -1,0 +1,21 @@
+{
+  "rule": "testability_policy",
+  "include": [
+    "tests/**/*.py"
+  ],
+  "banned_regexes": [
+    "pytest\\.skip\\(",
+    "@pytest\\.mark\\.skip",
+    "@pytest\\.mark\\.skipif"
+  ],
+  "checks": [
+    {
+      "path": "Makefile",
+      "regex": "MOCK_LLM=true.*pytest tests/ -v"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "regex": "MOCK_LLM:\\s*\"true\""
+    }
+  ]
+}

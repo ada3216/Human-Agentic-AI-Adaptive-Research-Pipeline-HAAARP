@@ -9,6 +9,7 @@ compatible with grounding_checker anchor format:
   Text segments: { "segment_id": "P01_session1_seg_042", "speaker": "P01", "text": "..." }
   Audio anchors: P01_session1_T00:04:12_T00:04:28_pause_3200ms
 """
+
 import sys
 from pathlib import Path
 
@@ -42,14 +43,10 @@ def transcribe(audio_path: str, config: dict = None) -> dict:
         print(f"[ERR_PREFLIGHT_MISSING] Audio file not found: {audio_path}")
         sys.exit(1)
 
-    # TODO: implement WhisperX transcription
-    # import whisperx
-    # model = whisperx.load_model("large-v2", device="cuda")  # or "cpu"
-    # result = model.transcribe(audio_path)
-    # aligned = whisperx.align(result["segments"], ...)
-    # diarized = whisperx.assign_word_speakers(diarize_model(...), aligned)
-
-    print(f"Transcription of {audio_path}: TODO — implement WhisperX integration")
+    print(
+        f"Transcription of {audio_path}: WhisperX execution is not wired in this scaffold yet. "
+        "Use pre-transcribed fixtures or extend this adapter locally."
+    )
     return {"transcript_id": None, "source_file": audio_path, "segments": []}
 
 

@@ -1,0 +1,6 @@
+{
+  "rule": "public_docstrings",
+  "include": [
+    "src/**/*.py"
+  ]
+}

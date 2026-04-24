@@ -4,9 +4,8 @@ Lens Dialogue Module — structured researcher reflexivity elicitation.
 Presents 10 questions to the researcher (via stdout), collects responses,
 uses local LLM to summarise into lens_summary, then locks the record.
 
-The 10 questions MUST be extracted from docs/lens.md — do not invent them.
-This stub contains placeholder questions; Copilot agent must replace with
-verbatim questions from docs/lens.md before implementation is complete.
+The question set is derived from `docs/lens.md` so the dialogue stays aligned
+with the written reflexivity protocol.
 
 researcher_signature must be ORCID or institutional username — not null.
 Lock requires non-null signature or exits with code 4.
@@ -23,42 +22,18 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-# ─── COPILOT AGENT: Replace these with verbatim questions from docs/lens.md ───
-# Section references below indicate which section of lens.md each Q comes from.
 LENS_QUESTIONS = [
-    # L1.1 — theoretical orientation
-    "What is your theoretical orientation for this study? Please describe the frameworks, "
-    "traditions, or theoretical commitments that inform how you approach this data.",
-    # L1.2 — clinical/professional orientation
-    "What is your relevant professional or clinical experience with this topic or population? "
-    "How might that experience shape what you notice or attend to?",
-    # L2.1 — primary hypotheses
-    "What are your primary hypotheses or expectations going into this analysis? "
-    "Please list them explicitly so they can be cross-checked against your pre-registration.",
-    # L2.2 — lens vocabulary
-    "What specific concepts, constructs, or vocabulary from your theoretical frame are you "
-    "likely to use or look for in the data? List these as your lens vocabulary.",
-    # L3.1 — vulnerable groups / power dynamics
-    "Are there specific vulnerabilities, power dynamics, or relational complexities in your "
-    "participant group that you expect to shape how they speak or present their experience?",
-    # L3.2 — expected participant indirection
-    "Do you expect participants to express certain experiences indirectly, through hedging, "
-    "displacement, or omission? If so, how do you expect that to manifest?",
-    # L4.1 — explicit exclusions
-    "What are you explicitly NOT looking for in this analysis? "
-    "What would you set aside or treat as out of scope?",
-    # L4.2 — evidence standard
-    "What is your evidence standard for a finding? How many participants and excerpts "
-    "would you require before treating something as a theme rather than a notable instance?",
-    # L5.1 — Pass 1 surprises
-    "Having seen the Pass 1 blind analysis output, what surprised you? "
-    "What did the blind reading surface that you had not anticipated?",
-    # L5.2 — confirmation + lock
-    "Please review your responses above. Is this an accurate and complete account of your "
-    "theoretical lens and positionality as you begin the positioned analysis? "
-    "Type your ORCID or institutional username below to confirm and lock this record.",
+    "How would you describe the integrative model the therapist is using, in your own words?",
+    "What are the core theoretical traditions being drawn on? How do they sit together in this therapist's practice? What does 'integrative' mean here specifically — is it theoretically integrative, technically eclectic, or something else?",
+    "What relational or psychodynamic concepts feel most alive and relevant to this research for you? For example: transference, countertransference, attachment, rupture and repair, the therapeutic alliance, projective identification, intersubjectivity. Which of these do you expect to appear, and in what form?",
+    "What does 'existential experience' mean to you in the context of therapy? Are you thinking about this in terms of meaning-making, mortality salience, isolation, freedom, identity — or something else? How do you expect it to show up in either what participants say in interview, or what happens in the sessions?",
+    "What is your relationship to this topic — personally, clinically, or professionally? How did you come to this research question? What draws you to it? Is there anything in your own clinical or personal experience that connects to what you are studying?",
+    "Do you hold any particular assumptions about what it is like to work with a therapist who is perceived as 'different'? What do you think clients might feel? What challenges or opportunities do you expect this creates in the therapeutic relationship? Try to be as honest as possible — these are not wrong answers, they are data about your lens.",
+    "What would it mean for this research if participants reported largely positive experiences? What if they reported largely difficult ones? Would either outcome surprise you? What do you find yourself hoping for, if anything? What would feel uncomfortable or challenging to find?",
+    "Is there anything about your own identity, background, or experience that positions you in a particular way in relation to this research? You do not need to disclose anything you are not comfortable with. But anything you are willing to name helps the AI understand the lens through which you are approaching interpretation.",
+    "If you had to guess: what do you think the IPA interviews will reveal about how participants experienced working with this therapist? What themes do you expect to emerge — in terms of the lived experience of the therapeutic relationship, the existential dimensions, the relational dynamics they describe?",
+    "What do you expect to see in the session transcripts at the discursive level? Where do you anticipate moments of relational intensity — rupture, repair, avoidance, displacement? What linguistic or interactional features do you expect to carry psychodynamic weight in these transcripts? What do you think you might have already noticed in Pass 1 that surprised you? Having seen the first-pass AI output — was there anything that felt unexpected, that didn't fit your expectations, that seemed interesting or strange? What in the data is pulling at you?",
 ]
-# ──────────────────────────────────────────────────────────────────────────────
 
 
 # ── Response extraction helpers ───────────────────────────────────────────────
@@ -150,45 +125,35 @@ def run_lens_dialogue(
         """Get response text for 1-based question number n."""
         return next((r["response"] for r in responses if r["question_number"] == n), "")
 
-    # Q1 theoretical orientation, Q2 clinical orientation
+    # Q1–Q5 theoretical and clinical positioning
     theoretical_orientation = _resp(1)
-    clinical_orientation = _resp(2)
+    clinical_orientation = "\n".join(filter(None, [_resp(2), _resp(5)]))
 
-    # Q3 primary hypotheses: each line is one hypothesis
+    # Q9–Q10 candidate hypotheses
     primary_hypotheses = [
         {"hypothesis": h, "in_prereg": bool(prereg_doi)}
-        for h in _split_lines(_resp(3))
+        for h in _split_lines("\n".join([_resp(9), _resp(10)]))
         if h
     ]
 
-    # Q4 lens vocabulary: comma/semicolon/newline-separated terms
-    lens_vocabulary = _split_vocabulary(_resp(4))
+    # Q3 lens vocabulary: comma/semicolon/newline-separated terms
+    lens_vocabulary = _split_vocabulary(_resp(3))
 
-    # Q5 vulnerable groups / power dynamics
-    vulnerable_groups = _resp(5)
+    # Q6–Q8 positionality and expectation dynamics
+    vulnerable_groups = "\n".join(filter(None, [_resp(6), _resp(7), _resp(8)]))
 
-    # Q6 expected participant indirection
-    expected_indirection = _resp(6)
+    # Q10 discourse expectations
+    expected_indirection = _resp(10)
 
-    # Q7 explicit exclusions: each line is one exclusion
-    explicit_exclusions = _split_lines(_resp(7))
+    # Explicit exclusions are not a standalone prompt in docs/lens.md
+    explicit_exclusions = []
 
-    # Q8 evidence standard: numeric + generalisation threshold
-    evidence_standard = _parse_evidence_standard(_resp(8))
+    # Evidence standard is inferred from the hypothesis/expectation cluster
+    evidence_standard = _parse_evidence_standard(_resp(10))
 
-    # Q9 Pass 1 surprises
-    pass1_surprises = _resp(9).strip()
-
-    # Q10: if researcher typed an ORCID or institutional ID, pre-fill signature
-    q10_text = _resp(10).strip()
-    prefilled_signature = (
-        q10_text
-        if (
-            q10_text.startswith("https://orcid.org/")
-            or re.match(r"^[\w\.\-@]{4,}$", q10_text)
-        )
-        else None
-    )
+    # Q10 Pass 1 surprises and discursive expectations
+    pass1_surprises = _resp(10).strip()
+    prefilled_signature = None
 
     # ── AI summarises responses via local model ────────────────────────────────
     _src = Path(__file__).parent.parent
@@ -207,7 +172,7 @@ def run_lens_dialogue(
 
     q_and_a = "\n\n".join(
         f"Q{r['question_number']}: {r['question']}\nA: {r['response']}"
-        for r in responses[:9]  # Q1–Q9 only; Q10 is the ORCID confirmation
+        for r in responses
     )
     model_cfg = config.get("model", {})
     lens_summary = call_generate(

@@ -1,0 +1,10 @@
+{
+  "rule": "structured_errors",
+  "include": [
+    "src/**/*.py"
+  ],
+  "banned_regexes": [
+    "raise\\s+Exception\\s*\\(",
+    "raise\\s+BaseException\\s*\\("
+  ]
+}

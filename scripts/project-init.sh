@@ -49,15 +49,7 @@ fi
 } > scripts/lint-check.sh
 chmod +x scripts/lint-check.sh
 
-# Update PROJECT_CONFIG.md governed_languages field
-python3 - "$(echo $ADAPTERS | tr ' ' ',')" << 'PYEOF'
-import sys, re
-langs = sys.argv[1]
-content = open(".ai-layer/PROJECT_CONFIG.md").read()
-content = re.sub(r"governed_languages:.*", f"governed_languages: {langs}", content)
-open(".ai-layer/PROJECT_CONFIG.md", "w").write(content)
-PYEOF
-
 echo ""
 echo "Generated scripts/lint-check.sh for: $ADAPTERS"
+echo "Governed languages remain the confirmed /project-init value; this detector no longer rewrites PROJECT_CONFIG.md."
 echo "Run /project-init in Magentica to configure project-specific lint rules."

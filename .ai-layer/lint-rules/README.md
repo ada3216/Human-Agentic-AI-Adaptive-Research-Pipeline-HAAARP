@@ -11,6 +11,7 @@ When lint fails, code has drifted from a stated architectural intention.
 |---|---|---|
 | `*.eslint.json` | js-ts.sh | Merged into ESLint config at lint time |
 | `*.ruff.toml` | python.sh | Merged into Ruff config at lint time |
+| `*.pycheck.json` | python.sh | Consumed by repo-specific Python rule checker |
 | `*.rules.md` | Human-readable | Required for every rule — states the intention |
 
 Every rule file MUST have a matching `.rules.md` explaining why the rule exists.

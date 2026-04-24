@@ -2,11 +2,11 @@
 
 # Run all tests with mocked LLM — no live model or network required
 test-local:
-	MOCK_LLM=true pytest tests/ -v
+	MOCK_LLM=true python3 -m pytest tests/ -v
 
 # CI target — identical to test-local; used by .github/workflows/ci.yml
 test:
-	MOCK_LLM=true pytest tests/ -v
+	MOCK_LLM=true python3 -m pytest tests/ -v
 
 lint:
 	bash scripts/lint-check.sh && bash scripts/size-check.sh

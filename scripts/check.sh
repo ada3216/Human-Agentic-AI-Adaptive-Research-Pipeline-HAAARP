@@ -24,7 +24,7 @@ if command -v gitleaks &>/dev/null; then
   gitleaks detect --no-git --source . --exit-code 1 2>/dev/null \
     || { echo "FAIL: secrets scan"; FAIL=$((FAIL+1)); }
 else
-  if grep -q "^- data_sensitivity: sensitive$" .ai-layer/PROJECT_CONFIG.md 2>/dev/null; then
+  if grep -Eq "^\s*-?\s*data_sensitivity:\s*sensitive\s*$" .ai-layer/PROJECT_CONFIG.md 2>/dev/null; then
     echo "FAIL: gitleaks is required for sensitive projects."
     FAIL=$((FAIL+1))
   else
@@ -36,7 +36,7 @@ fi
 section "Lockfile integrity"
 if [ -f package-lock.json ] || [ -f poetry.lock ]; then
   if ! git diff --quiet -- package-lock.json poetry.lock 2>/dev/null; then
-    if grep -q "^- data_sensitivity: sensitive$" .ai-layer/PROJECT_CONFIG.md 2>/dev/null; then
+    if grep -Eq "^\s*-?\s*data_sensitivity:\s*sensitive\s*$" .ai-layer/PROJECT_CONFIG.md 2>/dev/null; then
       echo "FAIL: lockfile changed in a sensitive project without /freeze-audit"
       FAIL=$((FAIL+1))
     else

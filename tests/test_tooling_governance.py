@@ -64,8 +64,8 @@ def test_size_check_uses_git_tracked_files_and_exemptions() -> None:
     assert "git', 'ls-files" in size_check
     assert "# EXEMPT: cohesive atomic unit" in size_check
     project_config = _read(".ai-layer/PROJECT_CONFIG.md")
-    assert '"src/modules/lens_dialogue.py": 400' in project_config
-    assert '"tests/test_pipeline.py": 400' in project_config
+    assert '"src/modules/lens_dialogue.py": 350' in project_config
+    assert '"tests/test_pipeline.py": 360' in project_config
 
 
 def test_existing_long_functions_are_marked_or_refactored() -> None:
@@ -89,7 +89,7 @@ def test_existing_long_functions_are_marked_or_refactored() -> None:
 def test_sensitive_shell_guards_match_markdown_config() -> None:
     check = _read("scripts/check.sh")
     autonomy = _read("scripts/set-autonomy.sh")
-    needle = 'grep -q "^- data_sensitivity: sensitive$" .ai-layer/PROJECT_CONFIG.md'
+    needle = 'grep -Eq "^\\s*-?\\s*data_sensitivity:\\s*sensitive\\s*$" .ai-layer/PROJECT_CONFIG.md'
     assert needle in check
     assert needle in autonomy
 

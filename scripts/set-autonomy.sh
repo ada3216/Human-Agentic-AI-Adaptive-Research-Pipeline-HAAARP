@@ -5,7 +5,7 @@ set -euo pipefail
 
 MODE="${1:-}"
 if [ "$MODE" = "full-yolo" ]; then
-  if grep -q "^- data_sensitivity: sensitive$" .ai-layer/PROJECT_CONFIG.md 2>/dev/null; then
+  if grep -Eq "^\s*-?\s*data_sensitivity:\s*sensitive\s*$" .ai-layer/PROJECT_CONFIG.md 2>/dev/null; then
     echo "ERROR: full-yolo mode is blocked because data_sensitivity is sensitive." >&2
     exit 1
   fi

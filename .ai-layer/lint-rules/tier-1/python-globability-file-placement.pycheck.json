@@ -1,0 +1,17 @@
+{
+  "rule": "file_placement",
+  "allowed_prefixes": [
+    "src/agent/",
+    "src/modules/",
+    "src/tools/",
+    "src/schemas/",
+    "tests/"
+  ],
+  "exempt_prefixes": [
+    ".ai-layer/",
+    ".github/",
+    ".opencode/",
+    "implementation docs/",
+    "scripts/"
+  ]
+}

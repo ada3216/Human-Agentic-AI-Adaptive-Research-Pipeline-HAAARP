@@ -1,0 +1,7 @@
+{
+  "rule": "naming_conventions",
+  "include": [
+    "src/**/*.py",
+    "tests/**/*.py"
+  ]
+}

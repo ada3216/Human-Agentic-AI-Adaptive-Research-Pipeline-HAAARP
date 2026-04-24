@@ -2,26 +2,26 @@
 
 ## What this system does
 
-project_summary: A modular, locally-executed research pipeline for AI-assisted qualitative psychotherapy research. Ethical and methodological safeguards are enforced at the infrastructure level — not left to researcher self-discipline. The pipeline implements two-pass locked analysis (blind Pass 1 cryptographically anchored before theoretically-positioned Pass 2), structured reflexivity elicitation, per-claim grounding verification with human evidence review, DPIA gating for special-category data, and audit bundle generation with full artifact hash chains.
+project_summary: A modular, locally-executed research pipeline scaffold for AI-assisted qualitative psychotherapy research. Ethical and methodological safeguards are enforced at the infrastructure level — not left to researcher self-discipline. The product centres two-pass locked analysis (blind Pass 1 cryptographically anchored before theoretically-positioned Pass 2), structured reflexivity elicitation, per-claim grounding verification with human evidence review, DPIA gating for special-category data, and audit bundle generation with full artifact hash chains.
 
 ## Who uses it and how
 
-users_and_context: Qualitative researchers (masters, PhD, lab teams) conducting psychotherapy or health-related studies. Researchers interact via CLI (`orchestrator.py`, `review_cli.py`, `lens_dialogue.py`). Supervisors verify audit bundles and handover checklists. The pipeline runs entirely on the researcher's local machine via Ollama; no cloud interaction except optional OSF deposit for governance anchors.
+users_and_context: Qualitative researchers (masters, PhD, lab teams) conducting psychotherapy or health-related studies. Researchers interact via CLI (`orchestrator.py`, `review_cli.py`, `lens_dialogue.py`). Supervisors verify audit bundles and handover checklists. The pipeline runs entirely on the researcher's local machine via Ollama; no cloud interaction except optional OSF deposit for governance anchors. The current repo ships as a CLI-first scaffold with mocked tests and example artifacts rather than a one-command production workflow.
 
 ## Key Components
 
 - orchestrator (`src/agent/orchestrator.py`): Sequences the 8 pipeline stages with hard gate checks at each transition — implemented
 - pass1_runner (`src/agent/pass1_runner.py`): Runs blind (no-context) Pass 1 analysis, writes output + anchor — implemented
 - pass2_runner (`src/agent/pass2_runner.py`): Runs lens-informed Pass 2 with 4 stability reruns; enforces 6 gate preconditions — implemented
-- lens_dialogue (`src/modules/lens_dialogue.py`): 10-question structured reflexivity interview, produces lockable lens record — implemented
-- grounding_checker (`src/modules/grounding_checker.py`): Per-claim evidence verification with support-strength ratings; writes `human_verdict: null` — implemented
+- lens_dialogue (`src/modules/lens_dialogue.py`): Structured reflexivity interview and lock flow — partial (interactive flow exists; question text still needs full verbatim alignment to `docs/lens.md`)
+- grounding_checker (`src/modules/grounding_checker.py`): Per-claim evidence verification with support-strength ratings; writes `human_verdict: null` — partial (review-record scaffolding exists; segment verification remains heuristic/TODO)
 - review_cli (`src/tools/review_cli.py`): Human-only verdict entry; the sole process that may set `human_verdict` to non-null — implemented
 - audit_emitter (`src/modules/audit_emitter.py`): Validates all governance conditions and packages the final audit bundle ZIP — implemented
 - dpia_gate (`src/modules/dpia_gate.py`): Hard block on special-category data ingestion without signed DPIA — implemented
 - ollama_client (`src/modules/ollama_client.py`): Local-only LLM interface with MOCK_LLM support for testing — implemented
-- osf_uploader (`src/modules/osf_uploader.py`): Upgrades anchor_type from local to osf_doi/repo_accession after external deposit — implemented
-- ingest_and_deid (`src/modules/ingest_and_deid.py`): Archives raw data and applies de-identification — implemented
-- transcribe_adapter (`src/modules/transcribe_adapter.py`): WhisperX local-only transcription adapter — implemented
+- osf_uploader (`src/modules/osf_uploader.py`): Upgrades anchor_type from local to osf_doi/repo_accession after external deposit — partial (manual DOI upgrade works; OSF API upload remains TODO)
+- ingest_and_deid (`src/modules/ingest_and_deid.py`): Archives raw data and applies de-identification — partial (baseline archive + replacement flow exists; stronger de-identification remains TODO)
+- transcribe_adapter (`src/modules/transcribe_adapter.py`): WhisperX local-only transcription adapter — partial (interface and validation exist; WhisperX execution remains TODO)
 
 ## Non-negotiable architectural patterns
 

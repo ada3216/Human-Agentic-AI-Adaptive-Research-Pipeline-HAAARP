@@ -21,4 +21,5 @@ Included: js-ts.sh, python.sh, shell.sh
 Naming conventions (required by section 3.8):
 - Use `eslint` naming for JS/TS adapter rule files (`*.eslint.json`)
 - Use `ruff` naming for Python adapter rule files (`*.ruff.toml`)
+- Use `pycheck` naming for repo-specific Python structural checks (`*.pycheck.json`)
 - Every rule file must have a matching `*.rules.md` explanation file

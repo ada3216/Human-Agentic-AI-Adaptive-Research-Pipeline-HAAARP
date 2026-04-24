@@ -17,6 +17,10 @@ node_modules/
 __pycache__/
 *.pyc
 *.pyo
+.venv/
+
+# Transient lint artefacts
+.ai-layer/lint-rules/lint-failures.log
 
 # Reports
 reports/
