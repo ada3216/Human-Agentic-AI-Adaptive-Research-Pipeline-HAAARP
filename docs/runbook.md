@@ -204,6 +204,56 @@ The audit bundle is your chain-of-custody record. Include it in your dissertatio
 
 ---
 
+## Step 10 — Delta comparison
+
+```bash
+python - <<'PY'
+from pathlib import Path
+from src.modules.ollama_client import call_generate
+
+prompt = Path('src/prompts/pass1_vs_pass2_delta_prompt.txt').read_text()
+filled = (
+    prompt.replace('{pass1_output}', Path('artifacts/pass1_output_[dataset_id].json').read_text())
+    .replace('{pass2_output}', Path('artifacts/pass2_output_seed42_[dataset_id].json').read_text())
+    .replace('{lens_summary}', Path('artifacts/lens_[run_id].json').read_text())
+)
+
+report = call_generate(
+    api_base='http://localhost:11434',
+    model='qwen2.5-27b-instruct',
+    system_prompt=filled,
+    user_prompt='Produce the delta report in Markdown.',
+    temperature=0.0,
+    expect_json=False,
+)
+print(report)
+PY
+```
+
+This compares the blind and lens-informed passes, making visible what the lens changed, what it illuminated, and what it may have distorted.
+
+---
+
+## Step 11 — Supervisor handover
+
+```bash
+python - <<'PY'
+from pathlib import Path
+
+required = [
+    'artifacts/audit_bundle_[run_id].zip',
+    'artifacts/audit_bundle_[run_id].json',
+    'artifacts/pass1_anchor_[dataset_id].json',
+]
+for path in required:
+    print(path, 'READY' if Path(path).exists() else 'MISSING')
+PY
+```
+
+Package the audit bundle, attach the delta report, and complete the supervisor handover checklist before any external release or examination review.
+
+---
+
 ## Running tests (no live model required)
 
 ```bash

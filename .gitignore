@@ -7,6 +7,7 @@ scripts/
 
 # Secrets
 .env
+config/secrets.yaml
 
 # Node
 node_modules/
@@ -20,3 +21,7 @@ __pycache__/
 # Reports
 reports/
 opencode-switcher/
+
+# Sensitive local artifacts
+artifacts/raw_archive/
+*_participant_code_map.json

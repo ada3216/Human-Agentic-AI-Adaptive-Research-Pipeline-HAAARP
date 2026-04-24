@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-04-24T11:43:48Z",
+  "schema_version": "1.0",
+  "files": [
+    {
+      "path": "docs/workflow.md",
+      "sha256": "d8c97341a71745e2050c26fc6f1e72ed7bbe68ccac93b5bb61b2c8db12b5af0b",
+      "description": "main pipeline spec"
+    },
+    {
+      "path": "docs/lens.md",
+      "sha256": "9be29710d20846717138575295494519521d7aebfa0bbbef3511ce618bdb55a5",
+      "description": "lens dialogue questions and guidance"
+    },
+    {
+      "path": "artifacts/audit_schema.json",
+      "sha256": "51b49f03b0d5746a5287b24739d2c25d370d7c2be77022291c3f5744f8570417",
+      "description": "audit metadata JSON schema"
+    },
+    {
+      "path": "artifacts/dpia_checklist.md",
+      "sha256": "234f2570d211a7c0dbb25b6976b2e36e802b1d23c3e27ec1297a7ed693b8767b",
+      "description": "DPIA submission template"
+    },
+    {
+      "path": "artifacts/consent_snippets.md",
+      "sha256": "f735ae79c270c1ce357d50d70d3aef9b914d1b64b0cd085cab4e7dd7f90beef3",
+      "description": "consent language templates"
+    }
+  ]
+}

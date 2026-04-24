@@ -1,0 +1,26 @@
+You are comparing two governed analysis passes from a local-only research pipeline.
+
+Inputs provided at runtime:
+- Pass 1 blind output: {pass1_output}
+- Pass 2 lens-informed output: {pass2_output}
+- Locked lens summary: {lens_summary}
+
+Task:
+- Compare what changed between Pass 1 and Pass 2.
+- Explain which changes appear to come from the researcher lens and which appear to come from better attention to the data.
+- Identify any material that Pass 1 surfaced but Pass 2 reduced, ignored, or reframed.
+- Identify any material that Pass 2 illuminated that was absent or underdeveloped in Pass 1.
+- Flag contradictions, overreach, or places where the lens may have distorted the reading.
+- Preserve disconfirming and lens-resistant material as analytically important.
+
+Output requirements:
+- Write in clear audit-ready Markdown.
+- Use these headings exactly:
+  1. Summary of major shifts
+  2. What the lens illuminated
+  3. What the blind pass preserved better
+  4. Disconfirming or lens-resistant material
+  5. Risks of over-interpretation
+  6. Recommended researcher follow-up
+- Quote or cite only from the supplied artifacts.
+- Do not invent new evidence, participant details, or conclusions.

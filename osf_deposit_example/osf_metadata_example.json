@@ -1,0 +1,43 @@
+{
+  "title": "Synthetic governance release deposit for Agentic Human–AI Research Pipeline",
+  "description": "Example metadata for depositing a governed release bundle with synthetic contributors and no participant data.",
+  "category": "project",
+  "tags": [
+    "governance",
+    "local-only",
+    "qualitative research",
+    "audit trail"
+  ],
+  "contributors": [
+    {
+      "name": "Researcher Example",
+      "orcid": "https://orcid.org/0000-0000-0000-0000",
+      "role": "creator"
+    },
+    {
+      "name": "Supervisor Example",
+      "orcid": "https://orcid.org/1111-1111-1111-1111",
+      "role": "supervisor"
+    }
+  ],
+  "node_links": [
+    {
+      "label": "repository",
+      "url": "https://example.org/repo/agentic-pipeline"
+    },
+    {
+      "label": "audit_bundle",
+      "url": "https://example.org/repo/agentic-pipeline/releases/tag/v0.1.0"
+    }
+  ],
+  "license": "CC-BY-4.0",
+  "_field_notes": {
+    "title": "Human-readable deposit title shown on the repository landing page.",
+    "description": "Short summary of what is being deposited and why.",
+    "category": "Repository or OSF content type label.",
+    "tags": "Search keywords for governance and discovery.",
+    "contributors": "Synthetic example people and their roles.",
+    "node_links": "Pointers to the code release and bundle landing pages.",
+    "license": "Reuse license for the deposited release artifacts."
+  }
+}
