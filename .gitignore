@@ -1,17 +1,15 @@
-# Runtime — regenerated each session
-.ai-layer/retry-counts.json
+# ── Mag framework (rsynced in, not tracked in this repo) ──
+.ai-layer/
+.opencode/
+.github/agents/
+.github/AGENT-SYSTEM.md
+scripts/
 
 # Secrets
-.ai-layer/.vault
-.ai-layer/.vault.salt
 .env
-
-# Session artefacts
-.ai-layer/session-toollog.md
 
 # Node
 node_modules/
-.opencode/package-lock.json
 
 # Python
 __pycache__/
@@ -19,10 +17,6 @@ __pycache__/
 *.pyo
 .venv/
 
-# Transient lint artefacts
-.ai-layer/lint-rules/lint-failures.log
-
 # Reports
 reports/
-opencode-switcher/
 opencode-switcher/
