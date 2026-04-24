@@ -6,7 +6,11 @@ These templates are written for UK-based psychotherapy research. Adjust legal re
 
 ---
 
-## A. Participant information sheet — AI analysis section
+## Variant A — Personal non-sensitive data
+
+Use this variant when `sensitivity: personal_non_sensitive` and the study does not process special category therapy or health data.
+
+### A1. Participant information sheet — AI analysis section
 
 *(Insert this section into your participant information sheet where you describe how data will be used.)*
 
@@ -20,7 +24,7 @@ These templates are written for UK-based psychotherapy research. Adjust legal re
 
 ---
 
-## B. Informed consent form — AI analysis item
+## A2. Informed consent form — AI analysis item
 
 *(Add this item to your consent form checklist.)*
 
@@ -32,7 +36,7 @@ These templates are written for UK-based psychotherapy research. Adjust legal re
 
 ---
 
-## C. Withdrawal from research — language
+## A3. Withdrawal from research — language
 
 *(Use or adapt this section when explaining the right to withdraw.)*
 
@@ -40,7 +44,7 @@ These templates are written for UK-based psychotherapy research. Adjust legal re
 
 ---
 
-## D. Audio/video recording consent
+## A4. Audio/video recording consent
 
 *(If you are recording therapy sessions, use this additional item.)*
 
@@ -48,6 +52,40 @@ These templates are written for UK-based psychotherapy research. Adjust legal re
 >
 > [ ] I consent to my recordings being retained until [end date] for verification purposes
 > [ ] I consent to my recordings being deleted after transcription
+
+---
+
+## Variant B — Special category data (GDPR Art. 9 / BPS)
+
+Use this variant when the study processes therapy, health, or other `special_category` data. Keep wording aligned with your approved DPIA and institutional ethics documents.
+
+### B1. Data category + sensitivity statement
+
+> **Special category data notice**
+>
+> This study involves psychotherapy or related health information. Your interview, session, or transcript data is treated as special category personal data under GDPR Article 9 and is handled under enhanced governance safeguards.
+
+### B2. Purpose and local-only processing statement
+
+> **Purpose and local-only processing**
+>
+> The purpose of this study is to examine psychotherapy experience, process, or meaning-making in a structured research setting. AI-assisted analysis is limited to local-only processing on the researcher's approved computer. Your data will not be sent to external APIs, cloud AI services, or other forms of data egress outside the approved governance pathway.
+
+### B3. Explicit consent language for Article 9 data
+
+> [ ] I explicitly consent to the use of my therapy-related or health-related data for this research study.
+> 
+> [ ] I understand that this research involves special category personal data under GDPR Article 9.
+> 
+> [ ] I understand that de-identified data may be analysed by a local-only AI system under researcher supervision, with no external API processing.
+
+### B4. DPIA / governance notice
+
+> A Data Protection Impact Assessment (DPIA) has been completed for this study before analysis began. The study follows local-only processing, de-identification, access control, audit trail recording, and supervisor or DPO sign-off requirements.
+
+### B5. Withdrawal / retention / contact wording
+
+> You may withdraw your participation without giving a reason. If you withdraw before analysis outputs are finalised, we will remove your data from the active research set where feasible. Retention and secure deletion will follow the approved ethics and DPIA schedule for this higher-sensitivity study. Contact [researcher contact details] or [supervisor/DPO contact details] with any withdrawal, retention, or data protection questions.
 
 ---
 

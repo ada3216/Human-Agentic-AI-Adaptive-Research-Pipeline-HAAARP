@@ -12,6 +12,13 @@ Under GDPR Article 9, processing special category data (health data, therapy tra
 
 For a master's dissertation: your university ethics committee sign-off typically satisfies this requirement. Check with your supervisor and/or institutional DPO.
 
+## Lawful basis for processing
+
+- **GDPR Article 6 basis:** [Select and justify the primary lawful basis for the study]
+- **GDPR Article 9 basis:** [Select and justify the special category condition, including explicit consent where used]
+- **Why this basis applies:** [Short explanation tied to the study design and institution]
+- **Recorded in study config:** [Confirm the lawful basis is reflected consistently in ethics paperwork and local study documentation]
+
 ---
 
 ## Checklist
@@ -49,6 +56,30 @@ For a master's dissertation: your university ethics committee sign-off typically
 - [ ] Data stored on encrypted device/volume
 - [ ] Access limited to named researchers only
 - [ ] Data destruction plan documented
+
+### 5a. Risk matrix
+
+| Risk | Likelihood | Impact | Mitigation | Residual risk |
+|---|---|---|---|---|
+| Re-identification from transcripts | [Low/Med/High] | [Low/Med/High] | [Describe de-identification and quote review controls] | [Low/Med/High] |
+| Unauthorised device or file access | [Low/Med/High] | [Low/Med/High] | [Describe encryption, passwords, and role-based access] | [Low/Med/High] |
+| Accidental data egress to external services | [Low/Med/High] | [Low/Med/High] | [Describe local-only processing and no external API use] | [Low/Med/High] |
+| Retention beyond approved schedule | [Low/Med/High] | [Low/Med/High] | [Describe deletion schedule and ownership] | [Low/Med/High] |
+
+### 5b. Mitigations
+
+1. **Local processing only** — all AI and transcription processing remains on the researcher's approved local machine.
+2. **De-identification before analysis** — direct identifiers are removed or replaced before any analytic processing.
+3. **Access control** — only named researchers or approved supervisors may access governed files.
+4. **Destruction plan** — raw and derived data are retained only for the approved period, then securely deleted.
+5. **Audit trail** — the pipeline records governed artifacts and review checkpoints to support later verification.
+
+### 5c. Config linkage
+
+- `config/*.yaml` study settings should mark whether DPIA completion is required for the dataset sensitivity classification.
+- `dpia_complete` in `artifacts/dpia_signed.json` is the machine-readable gate status used by the pipeline.
+- `dpia_document_path` in study configuration should point to this checklist or the signed DPIA record so supervisors can verify the source document.
+- Keep this checklist and `artifacts/dpia_signed.json` aligned; inconsistencies should be treated as a governance failure and resolved before ingestion.
 
 ### 6. Researcher sign-off
 

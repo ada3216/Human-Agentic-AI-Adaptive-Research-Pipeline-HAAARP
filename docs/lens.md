@@ -163,5 +163,43 @@ How to describe this process in your methodology chapter — language you can ad
 
 "A structured reflexivity protocol was employed between the first and second AI-assisted analytic passes. Following an initial blind pass of all data — in which no researcher framing was provided to the model — the researcher engaged in a structured dialogue with the AI system to articulate their theoretical commitments, clinical positionality, and a priori hypotheses. The AI produced a researcher lens summary which was confirmed prior to the second pass. This process externalised the reflexivity practice required by constructivist IPA methodology, creating a documented audit trail of the researcher's interpretive position. The AI was explicitly instructed to surface disconfirming material alongside lens-consistent findings, and the gap between blind and positioned passes was treated as analytically generative."
 
+## Fillable Template
+
+Use this template after Pass 1 and before Pass 2. Record responses in full sentences. Keep any example wording synthetic-only.
+
+1. **How would you describe the integrative model the therapist is using, in your own words?**  
+   Response: ____________________________________________
+
+2. **What are the core theoretical traditions being drawn on, and how do they sit together in this therapist's practice?**  
+   Response: ____________________________________________
+
+3. **What relational or psychodynamic concepts feel most alive and relevant to this research for you?**  
+   Response: ____________________________________________
+
+4. **What does “existential experience” mean to you in the context of therapy?**  
+   Response: ____________________________________________
+
+5. **What is your relationship to this topic — personally, clinically, or professionally?**  
+   Response: ____________________________________________
+
+6. **Do you hold any particular assumptions about what it is like to work with a therapist who is perceived as “different”?**  
+   Response: ____________________________________________
+
+7. **What would it mean for this research if participants reported largely positive experiences, and what if they reported largely difficult ones?**  
+   Response: ____________________________________________
+
+8. **Is there anything about your own identity, background, or experience that positions you in a particular way in relation to this research?**  
+   Response: ____________________________________________
+
+9. **If you had to guess, what do you think the IPA interviews will reveal about how participants experienced working with this therapist?**  
+   Response: ____________________________________________
+
+10. **What do you expect to see in the session transcripts at the discursive level, and what do you think you might already have noticed in Pass 1 that surprised you?**  
+    Response: ____________________________________________
+
+## Example
+
+See `examples/lens_example_locked.json` for a completed lens document using synthetic placeholder content only.
+
 Researcher Lens Protocol · MScPsychotherapy Research Design
 Option B — Two-Pass Human–AI Collaborative Analysis
