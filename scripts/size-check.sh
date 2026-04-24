@@ -24,10 +24,10 @@ def fail(message: str) -> None:
 
 
 def parse_config(text: str) -> tuple[int, int, list[tuple[str, int]]]:
-    file_match = re.search(r'^- max_file_lines:\s*(\d+)$', text, re.MULTILINE)
-    func_match = re.search(r'^- max_function_lines:\s*(\d+)$', text, re.MULTILINE)
+    file_match = re.search(r'^-?\s*max_file_lines:\s*(\d+)$', text, re.MULTILINE)
+    func_match = re.search(r'^-?\s*max_function_lines:\s*(\d+)$', text, re.MULTILINE)
     block_match = re.search(
-        r'^- max_file_lines_exempt_globs:\n(?P<body>(?:\s+- .*\n)+)',
+        r'^-?\s*max_file_lines_exempt_globs:\n(?P<body>(?:\s+- .*\n)+)',
         text,
         re.MULTILINE,
     )
@@ -39,6 +39,10 @@ def parse_config(text: str) -> tuple[int, int, list[tuple[str, int]]]:
             match = re.match(r'\s+-\s+"([^"]+)":\s*(\d+)$', line)
             if match:
                 exemptions.append((match.group(1), int(match.group(2))))
+                continue
+            plain = re.match(r'\s+-\s+(.+)$', line)
+            if plain:
+                exemptions.append((plain.group(1).strip(), 999999))
     return int(file_match.group(1)), int(func_match.group(1)), exemptions
 
 

@@ -1,0 +1,8 @@
+[lint]
+select = ["F", "S"]
+
+[lint.per-file-ignores]
+"tests/**" = ["S101", "S603", "S607"]
+"implementation docs/**" = ["S"]
+"src/modules/ollama_client.py" = ["S310"]
+"src/modules/audit_emitter.py" = ["S110"]
