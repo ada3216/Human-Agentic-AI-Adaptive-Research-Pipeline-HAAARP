@@ -72,3 +72,6 @@ DATE: 2026-04-24 | PLAN | Phase 5: Documentation, ethics & handover | scope: CON
 DATE: 2026-04-25 | IMPLEMENT | Phase 5 — Documentation, ethics & handover | complete | slot was: B | commit: 23512de
 DATE: 2026-04-25 | REVIEW_ATTEST | switched: yes | reason: none | policy: recommended
 DATE: 2026-04-25 | REVIEW_FAIL | Phase 5 — Documentation, ethics & handover | 1 items | slot A
+DATE: 2026-04-25 | REVIEW_ATTEST | switched: no | reason: user override — prior review incomplete, re-running on same provider | policy: recommended
+DATE: 2026-04-25 | REVIEW_PASS | Phase 5 — Documentation, ethics & handover | slot A
+DATE: 2026-04-25 | PLAIN_SUMMARY | Phase 5 — Documentation, ethics & handover | Added four documentation and ethics artifacts: updated docs/lens.md with a fillable 10-question template and pointer to the synthetic example; expanded artifacts/dpia_checklist.md with lawful basis fields, a risk matrix, mitigations list, and config linkage; restructured artifacts/consent_snippets.md into Variant A (personal non-sensitive) and Variant B (special category / GDPR Art. 9) with explicit consent language for therapy data; and created docs/supervisor_handover_checklist.md with all 11 devplan verification items, artifact references, and supervisor sign-off block. All files use synthetic-only content with no external links or data egress language.
