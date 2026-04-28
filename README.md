@@ -1,4 +1,4 @@
-# Agentic Human–AI Research Pipeline
+# Human-Agentic-AI-Adaptive-Research-Pipeline-HAAARP
 
 A governance-first architecture for AI-assisted qualitative research.  
 Companion repository to the paper **"A Governance-First Architecture for AI-Assisted Qualitative Research"** — [arXiv preprint](https://arxiv.org/abs/[ARXIV-ID-TO-ADD]).
