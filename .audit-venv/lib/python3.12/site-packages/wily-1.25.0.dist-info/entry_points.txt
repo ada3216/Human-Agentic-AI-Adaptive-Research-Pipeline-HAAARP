@@ -1,0 +1,3 @@
+[console_scripts]
+wily=wily.__main__:cli
+
