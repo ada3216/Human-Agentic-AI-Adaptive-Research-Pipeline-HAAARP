@@ -3,6 +3,8 @@
 A governance-first architecture for AI-assisted qualitative research.  
 Companion repository to the paper **"A Governance-First Architecture for AI-Assisted Qualitative Research"** — [Zenodo preprint](https://zenodo.org/records/19056606).
 
+Status: Beta — The governance architecture and scaffold are complete, but the pipeline has not yet been used in a live study. Treat as pre-production.
+
 ---
 
 ## What this is
